@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add event listener to handle form submission
     // This listens for when the user clicks the submit button or presses Enter
     budgetForm.addEventListener('submit', function(event) {
+        playClick()
+        
         // Prevent the default form submission behavior (which would refresh the page)
         event.preventDefault();
         
