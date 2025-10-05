@@ -1,7 +1,13 @@
-import * as XLSX from 'xlsx';
-import fs from 'fs';
+import { execSync } from 'child_process';
 
-// Function to convert XLSX file to a JSON array
+try {
+  execSync('npm install xlsx', { stdio: 'inherit' });
+} catch (error) {
+  console.error('Failed to install xlsx:', error);
+}
+import XLSX from 'xlsx';
+import fs from 'fs';
+// Function to convert XLSX file to a JSON array (table)
 function convertXLSXToTable(filePath) {
     const fileBuffer = fs.readFileSync(filePath);
     const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
@@ -12,7 +18,6 @@ function convertXLSXToTable(filePath) {
 const filePath = './food_items_with_price_and_emissions.xlsx';
 const foodTable = convertXLSXToTable(filePath);
 
-// Function to find and output the emissions and price of a selected food item
 function findPriceAndEmissions(food, foodTable) {
     for (const row of foodTable) {
         if (row['CommonValues'].toLowerCase() === food.toLowerCase()) {
@@ -21,3 +26,45 @@ function findPriceAndEmissions(food, foodTable) {
     }
     return null;
 }
+
+function compareFoods(foods, chosenFood, foodTable) {
+    // Get info for each food
+    const foodInfo = foods
+        .map(food => findPriceAndEmissions(food, foodTable))
+        .filter(info => info !== null);
+
+    if (foodInfo.length === 0) {
+        return { emissionsSavings: 0, priceDifference: 0 };
+    }
+
+    // Extract emissions and prices
+    const emissions = foodInfo.map(info => Number(info.emissions));
+    const prices = foodInfo.map(info => Number(info.price));
+
+    const chosenFoodEmissions = findPriceAndEmissions(chosenFood, foodTable)?.emissions;
+    const chosenFoodPrice = findPriceAndEmissions(chosenFood, foodTable)?.price;
+    // Calculate savings
+    let emissionsSavings = Math.max(...emissions) - chosenFoodEmissions;
+    let priceDifference = Math.max(...prices) - chosenFoodPrice;
+    if (emissionsSavings < 0) {
+        emissionsSavings = 0
+    }
+    if (priceDifference < 0) {
+        priceDifference = 0
+    }
+    return { emissionsSavings, priceDifference };
+}
+
+
+const recorded_total_savings = [0, 0];
+function totalSavings (foods, chosenFood, foodTable, recorded_total_savings, ) {
+    recorded_total_savings[0] += compareFoods(foods, chosenFood, foodTable).emissionsSavings
+    recorded_total_savings[1] += compareFoods(foods, chosenFood, foodTable).priceDifference
+    return recorded_total_savings
+}
+totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+
+const savings = totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+
+console.log(`You have saved: £${savings[1]} and ${savings[0]} emissions`);
