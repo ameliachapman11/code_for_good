@@ -56,18 +56,7 @@ function compareFoods(foods, chosenFood, foodTable) {
 }
 
 
-const recorded_total_savings = [0, 0];
-function totalSavings (foods, chosenFood, foodTable, recorded_total_savings, ) {
-    recorded_total_savings[0] += compareFoods(foods, chosenFood, foodTable).emissionsSavings
-    recorded_total_savings[1] += compareFoods(foods, chosenFood, foodTable).priceDifference
-    return recorded_total_savings
-}
-totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
-totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
 
-const savings = totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
-
-console.log(`You have saved: £${savings[1]} and ${savings[0]} emissions`);
 
 // User input: initial and chosen food
 const initialFood = 'avocados'; // change as needed
@@ -90,3 +79,24 @@ if (savings2) {
 } else {
     console.log('One or both foods not found in the data.');
 }
+
+
+
+
+// Running total for savings
+const recorded_total_savings = [0, 0];
+
+function addToTotalSavings(initialFood, chosenFood, foodTable, recorded_total_savings) {
+    const result = compareTwoFoods(initialFood, chosenFood, foodTable);
+    if (result) {
+        recorded_total_savings[0] += Math.max(0, result.emissionsSavings);
+        recorded_total_savings[1] += Math.max(0, result.priceSavings);
+    }
+    return recorded_total_savings;
+}
+
+// Example usage:
+addToTotalSavings('avocados', 'cucumber', foodTable, recorded_total_savings);
+addToTotalSavings('cucumber', 'raspberries', foodTable, recorded_total_savings);
+
+console.log(`Total saved: £${recorded_total_savings[1]} and ${recorded_total_savings[0]} emissions`);
