@@ -1,0 +1,177 @@
+[
+  {
+    "CommonValues": "avocados",
+    "PRICE": 0.94,
+    "EMISSIONS": 0.921227093548387
+  },
+  {
+    "CommonValues": "bacon",
+    "PRICE": 9.4,
+    "EMISSIONS": 19.3142090123023
+  },
+  {
+    "CommonValues": "bananas",
+    "PRICE": 1.09,
+    "EMISSIONS": 0.873349572916666
+  },
+  {
+    "CommonValues": "beef mince",
+    "PRICE": 8.68,
+    "EMISSIONS": 95.0345722731625
+  },
+  {
+    "CommonValues": "beef steak",
+    "PRICE": 18.54,
+    "EMISSIONS": 129.747714826
+  },
+  {
+    "CommonValues": "broccoli",
+    "PRICE": 2.51,
+    "EMISSIONS": 0.897401521212121
+  },
+  {
+    "CommonValues": "butter",
+    "PRICE": 2.53,
+    "EMISSIONS": 3.32450318300653
+  },
+  {
+    "CommonValues": "carrots",
+    "PRICE": 0.83,
+    "EMISSIONS": 0.935163376
+  },
+  {
+    "CommonValues": "cauliflower",
+    "PRICE": 1.26,
+    "EMISSIONS": 0.891726245454545
+  },
+  {
+    "CommonValues": "cheddar cheese",
+    "PRICE": 9.11,
+    "EMISSIONS": 20.7490445367469
+  },
+  {
+    "CommonValues": "coffee pods",
+    "PRICE": 4.61,
+    "EMISSIONS": 20.2997635578947
+  },
+  {
+    "CommonValues": "courgettes",
+    "PRICE": 3.07,
+    "EMISSIONS": 0.846479423076923
+  },
+  {
+    "CommonValues": "couscous",
+    "PRICE": 0.95,
+    "EMISSIONS": 1.1579787751631
+  },
+  {
+    "CommonValues": "crisps",
+    "PRICE": 1.14,
+    "EMISSIONS": 3.03172444787401
+  },
+  {
+    "CommonValues": "cucumber",
+    "PRICE": 0.93,
+    "EMISSIONS": 0.847113736116381
+  },
+  {
+    "CommonValues": "eggs",
+    "PRICE": 3.45,
+    "EMISSIONS": 4.43660007040358
+  },
+  {
+    "CommonValues": "grapes",
+    "PRICE": 4.47,
+    "EMISSIONS": 8.27887637301587
+  },
+  {
+    "CommonValues": "ice cream",
+    "PRICE": 3.4,
+    "EMISSIONS": 3.66180945375782
+  },
+  {
+    "CommonValues": "instant coffee",
+    "PRICE": 3.83,
+    "EMISSIONS": 28.7836413166666
+  },
+  {
+    "CommonValues": "melon",
+    "PRICE": 2.03,
+    "EMISSIONS": 1.05653597435897
+  },
+  {
+    "CommonValues": "mushrooms",
+    "PRICE": 3.56,
+    "EMISSIONS": 2.35291667403314
+  },
+  {
+    "CommonValues": "olive oil",
+    "PRICE": 8.73,
+    "EMISSIONS": 5.18462823137254
+  },
+  {
+    "CommonValues": "onions",
+    "PRICE": 1.07,
+    "EMISSIONS": 0.3628603477707
+  },
+  {
+    "CommonValues": "oranges",
+    "PRICE": 0.43,
+    "EMISSIONS": 0.466549539534883
+  },
+  {
+    "CommonValues": "parmesan cheese",
+    "PRICE": 21.75,
+    "EMISSIONS": 24.016479826923
+  },
+  {
+    "CommonValues": "peanut butter",
+    "PRICE": 1.96,
+    "EMISSIONS": 3.43496020225563
+  },
+  {
+    "CommonValues": "peppers",
+    "PRICE": 1.03,
+    "EMISSIONS": 0.918662142857142
+  },
+  {
+    "CommonValues": "pineapple",
+    "PRICE": 1.27,
+    "EMISSIONS": 0.9320080325
+  },
+  {
+    "CommonValues": "pork sausages",
+    "PRICE": 6.84,
+    "EMISSIONS": 9.76787802021892
+  },
+  {
+    "CommonValues": "quiche",
+    "PRICE": 2.88,
+    "EMISSIONS": 4.66683265555555
+  },
+  {
+    "CommonValues": "raspberries",
+    "PRICE": 14.29,
+    "EMISSIONS": 8.3709720025
+  },
+  {
+    "CommonValues": "sponge cake",
+    "PRICE": 2.95,
+    "EMISSIONS": 1.87744837826086
+  },
+  {
+    "CommonValues": "tomatoes",
+    "PRICE": 3.21,
+    "EMISSIONS": 2.27151545619298
+  },
+  {
+    "CommonValues": "whole milk",
+    "PRICE": 1.51,
+    "EMISSIONS": 3.70323662732732
+  },
+  {
+    "CommonValues": "semi skimmed milk",
+    "PRICE": 1.24,
+    "EMISSIONS": 3.70323662732732
+  }
+]

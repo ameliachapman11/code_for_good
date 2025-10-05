@@ -36,6 +36,75 @@
             padding: 20px;
         }
         
+        /* Alternative options container */
+        .alternatives-container {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 10;
+        }
+        
+        /* Individual alternative option card */
+        .alternative-card {
+            width: 200px;
+            height: 120px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .alternative-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #4CAF50;
+        }
+        
+        .alternative-card.selected {
+            border-color: #4CAF50;
+            background: #E8F5E8;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .card-price {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        
+        .card-emissions {
+            font-size: 11px;
+            color: #888;
+        }
+        
+        /* Shopping list item states */
+        .current-item {
+            background-color: #E3F2FD;
+            border-left: 4px solid #2196F3;
+            padding-left: 10px;
+            font-weight: bold;
+        }
+        
+        .processed-item {
+            background-color: #E8F5E8;
+            border-left: 4px solid #4CAF50;
+            padding-left: 10px;
+            opacity: 0.7;
+        }
+        
         /* Shopping list paper - styled to look like a real piece of paper */
         .shopping-paper {
             width: 300px;
@@ -216,6 +285,11 @@
         <!-- Navigation button to return to the main budget form -->
         <button class="back-button" onclick="goBack()">← Back to Budget</button>
         
+        <!-- Alternative options container -->
+        <div class="alternatives-container" id="alternativesContainer">
+            <!-- Alternative option cards will be populated here -->
+        </div>
+        
         <!-- Shopping list paper - the main content area -->
         <div class="shopping-paper">
             <!-- Loading overlay that shows while AI processes the shopping list -->
@@ -236,7 +310,199 @@
         </div>
     </div>
     
+    <!-- Load the food data script -->
+    <script src="extractFoodInfo.js"></script>
+    
     <script>
+        // Global variables for managing the shopping list and alternatives
+        let currentShoppingList = [];
+        let currentItemIndex = 0;
+        // foodTable is declared in extractFoodInfo.js
+        
+        // Initialize food data when the page loads
+        async function initializeFoodData() {
+            // Wait for the food data to load from JSON
+            if (typeof loadFoodData !== 'undefined') {
+                await loadFoodData();
+                console.log('✅ Food data loaded:', foodTable.length, 'items');
+            } else {
+                console.warn('⚠️ loadFoodData function not available, using fallback data');
+                // Fallback data if extractFoodInfo.js doesn't load
+                foodTable = [
+                    { CommonValues: "Apples", PRICE: 2.50, EMISSIONS: 0.4 },
+                    { CommonValues: "Bananas", PRICE: 1.80, EMISSIONS: 0.3 },
+                    { CommonValues: "Bread", PRICE: 1.20, EMISSIONS: 0.8 },
+                    { CommonValues: "Chicken", PRICE: 4.50, EMISSIONS: 2.1 },
+                    { CommonValues: "Milk", PRICE: 1.10, EMISSIONS: 0.6 }
+                ];
+            }
+        }
+        
+        // Function to find similar food items using AI and the Excel data
+        async function findSimilarItems(itemName) {
+            // First try to use the Excel data to find similar items
+            if (typeof findSimilarFoodItems !== 'undefined') {
+                const similarItems = findSimilarFoodItems(itemName, foodTable);
+                if (similarItems.length > 0) {
+                    return similarItems.map(item => item.name);
+                }
+            }
+            
+            // If no similar items found in Excel data, use AI via proxy server
+            const API_URL = 'http://localhost:3001/api/claude';
+            
+            const prompt = `You are a food category expert. Given a food item, suggest 2 similar alternatives from the same food category.
+
+Food item: "${itemName}"
+
+Available food categories and examples:
+- Fruit: apples, bananas, oranges, grapes, strawberries
+- Meat: chicken, beef, pork, lamb, turkey
+- Dairy: milk, cheese, yogurt, butter
+- Bakery: bread, croissants, bagels, muffins
+- Grain: rice, pasta, quinoa, oats
+- Vegetables: carrots, broccoli, spinach, tomatoes
+
+Return exactly 2 similar food items as a comma-separated list. Only return the names, nothing else.
+
+Example: If input is "apples", return: "Bananas, Oranges"`;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        shoppingList: itemName
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success && data.items) {
+                    return data.items.slice(0, 2); // Take only first 2
+                } else {
+                    throw new Error('Invalid response from proxy server');
+                }
+            } catch (error) {
+                console.error('Error finding similar items:', error);
+                // Fallback to simple alternatives
+                return getFallbackAlternatives(itemName);
+            }
+        }
+        
+        // Simple fallback function for finding alternatives
+        function getFallbackAlternatives(itemName) {
+            const lowerItem = itemName.toLowerCase();
+            if (lowerItem.includes('apple') || lowerItem.includes('fruit')) {
+                return ['Bananas', 'Oranges'];
+            } else if (lowerItem.includes('bread') || lowerItem.includes('bakery')) {
+                return ['Croissants', 'Bagels'];
+            } else if (lowerItem.includes('chicken') || lowerItem.includes('meat')) {
+                return ['Beef', 'Pork'];
+            } else if (lowerItem.includes('milk') || lowerItem.includes('dairy')) {
+                return ['Cheese', 'Yogurt'];
+            } else {
+                return ['Similar Item 1', 'Similar Item 2'];
+            }
+        }
+        
+        // Function to get food data (price and emissions) using the original function
+        function getFoodData(foodName) {
+            // Use the original findPriceAndEmissions function from extractFoodInfo.js
+            const result = findPriceAndEmissions(foodName, foodTable);
+            if (result) {
+                return {
+                    name: foodName,
+                    price: result.price,
+                    emissions: result.emissions
+                };
+            } else {
+                return { name: foodName, price: 0, emissions: 0 };
+            }
+        }
+        
+        // Function to create alternative option cards
+        function createAlternativeCards(originalItem, alternatives) {
+            const container = document.getElementById('alternativesContainer');
+            container.innerHTML = '';
+            
+            // Create original item card
+            const originalData = getFoodData(originalItem);
+            const originalCard = createCard(originalItem, originalData, true);
+            container.appendChild(originalCard);
+            
+            // Create alternative cards
+            alternatives.forEach(altItem => {
+                const altData = getFoodData(altItem);
+                const altCard = createCard(altItem, altData, false);
+                container.appendChild(altCard);
+            });
+            
+            container.style.display = 'flex';
+        }
+        
+        // Function to create individual cards
+        function createCard(itemName, data, isOriginal) {
+            const card = document.createElement('div');
+            card.className = 'alternative-card';
+            if (isOriginal) card.classList.add('selected');
+            
+            card.innerHTML = `
+                <div class="card-title">${itemName}</div>
+                <div class="card-price">Price: £${data.price.toFixed(2)}</div>
+                <div class="card-emissions">Emissions: ${data.emissions}kg CO2</div>
+            `;
+            
+            card.onclick = () => selectAlternative(itemName, isOriginal);
+            return card;
+        }
+        
+        // Function to handle alternative selection
+        function selectAlternative(selectedItem, isOriginal) {
+            if (!isOriginal) {
+                // Replace the current item in the list
+                currentShoppingList[currentItemIndex] = selectedItem;
+                updateShoppingListDisplay();
+            }
+            
+            // Move to next item
+            currentItemIndex++;
+            if (currentItemIndex < currentShoppingList.length) {
+                processNextItem();
+            } else {
+                // All items processed
+                document.getElementById('alternativesContainer').style.display = 'none';
+                alert('All items processed! Your final shopping list is ready.');
+            }
+        }
+        
+        // Function to process the next item in the list
+        async function processNextItem() {
+            if (currentItemIndex >= currentShoppingList.length) return;
+            
+            const currentItem = currentShoppingList[currentItemIndex];
+            const alternatives = await findSimilarItems(currentItem);
+            createAlternativeCards(currentItem, alternatives);
+        }
+        
+        // Function to update the shopping list display
+        function updateShoppingListDisplay() {
+            const shoppingListElement = document.getElementById('shoppingList');
+            shoppingListElement.innerHTML = currentShoppingList.map((item, index) => {
+                const isCurrent = index === currentItemIndex;
+                const isProcessed = index < currentItemIndex;
+                let className = '';
+                if (isCurrent) className = 'current-item';
+                if (isProcessed) className = 'processed-item';
+                return `<li class="${className}">${item}</li>`;
+            }).join('');
+        }
+
         // Function to extract budget and shopping list data from URL parameters
         // This allows data to be passed from the main form to this shopping page
         function getUrlParameters() {
@@ -257,11 +523,10 @@
             return cleanedItems;
         }
         
-        // Real AI API call function using Anthropic Claude API
+        // Real AI API call function using proxy server
         async function callAIAPI(shoppingList) {
-            // Get your API key from: https://console.anthropic.com/
-            const API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE'; // Replace with your actual Anthropic API key
-            const API_URL = 'https://api.anthropic.com/v1/messages';
+            // Use the proxy server to avoid CORS issues
+            const API_URL = 'http://localhost:3001/api/claude';
             
             console.log('🤖 Calling Anthropic Claude API with list:', shoppingList);
             console.log('🔑 Using API endpoint:', API_URL);
@@ -316,20 +581,10 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': API_KEY,
-                        'anthropic-version': '2023-06-01'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'claude-3-sonnet-20240229',
-                        max_tokens: 500,
-                        temperature: 0.3,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ]
+                        shoppingList: shoppingList
                     })
                 });
                     
@@ -344,20 +599,12 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                     const data = await response.json();
                     console.log('✅ API Response data:', data);
                     
-                    if (!data.content || !data.content[0] || !data.content[0].text) {
+                    if (!data.success || !data.items) {
                         console.error('❌ Invalid API response structure:', data);
-                        throw new Error('Invalid response from Anthropic Claude API');
+                        throw new Error('Invalid response from proxy server');
                     }
                     
-                    const cleanedText = data.content[0].text.trim();
-                    console.log('🧹 AI cleaned text:', cleanedText);
-                    
-                    // Split the AI response into individual items - handle periods too
-                    const result = cleanedText.split(/[,;]/).map(item => {
-                        // Also split on periods if they're clearly separators
-                        return item.split('.').map(subItem => subItem.trim()).filter(subItem => subItem.length > 0);
-                    }).flat().filter(item => item.length > 0);
-                    
+                    const result = data.items;
                     console.log('📝 Final processed items:', result);
                     return result;
                     
@@ -383,6 +630,10 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             try {
+                // Wait for food data to load first
+                console.log('🔄 Loading food data...');
+                await initializeFoodData();
+                
                 // Clean up the shopping list using Claude AI only
                 console.log('🚀 Starting Claude AI filtering process...');
                 const cleanedItems = await cleanupShoppingList(params.shoppingList);
@@ -390,14 +641,20 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                 // Hide the loading overlay since processing is complete
                 document.getElementById('loadingOverlay').style.display = 'none';
                 
+                // Store the cleaned items globally
+                currentShoppingList = cleanedItems;
+                currentItemIndex = 0;
+                
                 // Display the cleaned shopping items in the list
                 const shoppingListElement = document.getElementById('shoppingList');
                 if (cleanedItems.length === 0) {
                     // Show message if no valid grocery items were found
                     shoppingListElement.innerHTML = '<li>No valid grocery items found in your list</li>';
                 } else {
-                    // Create list items for each cleaned grocery item
-                    shoppingListElement.innerHTML = cleanedItems.map(item => `<li>${item}</li>`).join('');
+                    // Update the display and start processing alternatives
+                    updateShoppingListDisplay();
+                    // Start processing the first item
+                    await processNextItem();
                 }
                 
                 console.log('✅ Claude AI filtering completed successfully');
@@ -419,6 +676,7 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
         // Initialize the page when the DOM is fully loaded
         // This ensures all HTML elements are available before JavaScript runs
         document.addEventListener('DOMContentLoaded', function() {
+            initializeFoodData(); // Load food data first
             displayShoppingList(); // Start the shopping list display process
         });
     </script>
