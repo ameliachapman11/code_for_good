@@ -212,6 +212,24 @@ textarea:focus {
         0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+#savings {
+    margin: 0 auto;
+    width: 50%;
+    padding: 12px;
+    border: 3px solid #8B4513;
+    border-radius: 5px;
+    font-size: 1.5em;
+    font-family: inherit;
+    background-color: #F5DEB3;
+    color: #2F4F4F;
+    font-weight: 500;
+    resize: vertical;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 
 /* Responsive design for mobile devices */
 @media (max-width: 600px) {
