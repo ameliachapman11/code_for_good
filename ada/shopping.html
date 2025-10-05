@@ -254,9 +254,48 @@
                 return cleanedItems;
                 
             } catch (error) {
-                // If AI fails, return the original list split by commas as fallback
-                console.log('Google AI API failed, using basic fallback');
-                return shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                // If AI fails, use basic fallback processing
+                console.log('🔄 Google AI API failed, using basic fallback processing');
+                
+                // Basic cleanup without AI
+                const items = shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                
+                // Basic grocery item validation and cleanup
+                const groceryItems = items.filter(item => {
+                    const lowerItem = item.toLowerCase();
+                    // Remove obvious non-grocery items
+                    const nonGrocery = ['car', 'phone', 'computer', 'book', 'toy', 'game', 'clothes', 'shoes', 'house', 'apartment'];
+                    return !nonGrocery.some(nonGrocery => lowerItem.includes(nonGrocery));
+                });
+                
+                // Basic pluralization for duplicates
+                const itemCounts = {};
+                groceryItems.forEach(item => {
+                    const lowerItem = item.toLowerCase();
+                    itemCounts[lowerItem] = (itemCounts[lowerItem] || 0) + 1;
+                });
+                
+                const result = [];
+                Object.keys(itemCounts).forEach(item => {
+                    const count = itemCounts[item];
+                    const capitalized = item.charAt(0).toUpperCase() + item.slice(1);
+                    
+                    if (count > 1) {
+                        // Simple pluralization
+                        if (item.endsWith('y')) {
+                            result.push(capitalized.slice(0, -1) + 'ies');
+                        } else if (item.endsWith('s') || item.endsWith('sh') || item.endsWith('ch')) {
+                            result.push(capitalized + 'es');
+                        } else {
+                            result.push(capitalized + 's');
+                        }
+                    } else {
+                        result.push(capitalized);
+                    }
+                });
+                
+                console.log('📝 Basic fallback result:', result);
+                return result;
             }
         }
         
@@ -265,6 +304,8 @@
             // Get your free API key from: https://makersuite.google.com/app/apikey
             const API_KEY = 'AIzaSyB6A1MUJL5SunCDI7BdhxZLrxNBZ0G0d_o'; // Replace with your actual Google AI API key
             const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+            
+            console.log('🤖 Calling Google AI API with list:', shoppingList);
             
             const prompt = `Please clean up this shopping list for a UK grocery store. Be thorough and intelligent in your processing.
 
@@ -290,6 +331,8 @@ Examples of what to do:
 Return ONLY the cleaned grocery items as a comma-separated string. Do not include any explanations or additional text.`;
             
             try {
+                console.log('📡 Making API request to:', API_URL);
+                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
@@ -314,23 +357,33 @@ Return ONLY the cleaned grocery items as a comma-separated string. Do not includ
                     })
                 });
                 
+                console.log('📊 API Response status:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error(`Google AI API error: ${response.status} - ${response.statusText}`);
+                    const errorText = await response.text();
+                    console.error('❌ API Error Response:', errorText);
+                    throw new Error(`Google AI API error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
                 }
                 
                 const data = await response.json();
+                console.log('✅ API Response data:', data);
                 
                 if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    console.error('❌ Invalid API response structure:', data);
                     throw new Error('Invalid response from Google AI API');
                 }
                 
                 const cleanedText = data.candidates[0].content.parts[0].text.trim();
+                console.log('🧹 AI cleaned text:', cleanedText);
                 
                 // Split the AI response into individual items
-                return cleanedText.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                const result = cleanedText.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                console.log('📝 Final processed items:', result);
+                return result;
                 
             } catch (error) {
-                console.error('Google AI API call failed:', error);
+                console.error('❌ Google AI API call failed:', error);
+                console.log('🔄 Falling back to basic processing...');
                 throw error;
             }
         }
