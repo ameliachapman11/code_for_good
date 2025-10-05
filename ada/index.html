@@ -3,10 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conscious Shopping</title>
+    <title>BudgetWise - Smart Food Planning</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Main container for the page -->
+    <div class="container">
+        <!-- Page header -->
+        <h1>BudgetWise</h1>
+        <p class="subtitle">Smart Food Planning for Financial Wellness</p>
+        
+        <!-- Form for entering budget and shopping list -->
+        <form id="budgetForm" class="budget-form">
+            <!-- Budget input field -->
+            <div class="form-group">
+                <label for="budget">Food Budget (£):</label>
+                <input 
+                    type="number" 
+                    id="budget" 
+                    name="budget" 
+                    placeholder="Enter your budget amount"
+                    required
+                    min="0"
+                    step="0.01"
+                >
+            </div>
+            
+            <!-- Shopping list textarea -->
+            <div class="form-group">
+                <label for="shoppingList">Shopping List:</label>
+                <textarea 
+                    id="shoppingList" 
+                    name="shoppingList" 
+                    placeholder="Enter your shopping items (e.g., apples, bread, milk)"
+                    required
+                    rows="4"
+                ></textarea>
+            </div>
+            
+            <!-- Submit button -->
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+        
+        <!-- Section to display submitted entries -->
+        <div class="entries-section">
+            <h2>Your Budget Entries</h2>
+            <div id="entriesList" class="entries-list">
+                <!-- Entries will be added here by JavaScript -->
+            </div>
+        </div>
+    </div>
     
+    <!-- Link to JavaScript file -->
+    <script src="script.js"></script>
 </body>
 </html>

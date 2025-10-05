@@ -1,5 +1,257 @@
+/* Reset default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling with background image */
 body {
     background-image: url(./assets/background.png);
     background-size: cover;
-    height: 100vh;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Main container - centers everything on the page */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.95);
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Page header styling */
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+/* Form styling - Wooden board effect */
+.budget-form {
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 25%, #8B4513 50%, #A0522D 75%, #8B4513 100%);
+    background-size: 20px 20px;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    border: 4px solid #654321;
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* Add wood grain texture overlay */
+.budget-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            rgba(139, 69, 19, 0.1) 2px,
+            rgba(139, 69, 19, 0.1) 4px
+        ),
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(160, 82, 45, 0.1) 2px,
+            rgba(160, 82, 45, 0.1) 4px
+        );
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+/* Form group styling - each input field and label */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Label styling - for wooden board */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #FFF8DC;
+    font-size: 1.1em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    position: relative;
+    z-index: 1;
+}
+
+/* Input field styling - rustic wooden theme */
+input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 3px solid #8B4513;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #F5DEB3;
+    color: #2F4F4F;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #D2691E;
+    box-shadow: 
+        inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+        0 0 0 3px rgba(210, 105, 30, 0.3);
+    background-color: #FFF8DC;
+}
+
+/* Textarea styling - rustic wooden theme */
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 3px solid #8B4513;
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: inherit;
+    background-color: #F5DEB3;
+    color: #2F4F4F;
+    font-weight: 500;
+    resize: vertical;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #D2691E;
+    box-shadow: 
+        inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+        0 0 0 3px rgba(210, 105, 30, 0.3);
+    background-color: #FFF8DC;
+}
+
+/* Submit button styling - wooden theme */
+.submit-btn {
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+    color: #FFF8DC;
+    padding: 12px 30px;
+    border: 3px solid #654321;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #A0522D 0%, #8B4513 50%, #A0522D 100%);
+    transform: translateY(-2px);
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.submit-btn:active {
+    transform: translateY(0px);
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.2),
+        0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Entries section styling */
+.entries-section {
+    margin-top: 30px;
+}
+
+.entries-section h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+/* Individual entry styling */
+.entry {
+    background-color: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Entry content styling */
+.entry-budget {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 10px;
+}
+
+.entry-list {
+    font-size: 1em;
+    color: #495057;
+    line-height: 1.5;
+}
+
+/* Empty state styling */
+.empty-message {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    padding: 40px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 2px dashed #dee2e6;
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 600px) {
+    .container {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    
+    .budget-form {
+        padding: 20px;
+    }
 }
