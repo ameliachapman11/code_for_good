@@ -7,8 +7,10 @@
 
 /* Body styling with background image */
 body {
-    background-image: url(./assets/background.png);
+    background-image: url(./assets/background_2.png);
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
     font-family: 'Arial', sans-serif;
@@ -201,70 +203,6 @@ textarea:focus {
         0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Entries section styling - integrated with wooden board */
-.entries-section {
-    margin: 0 20px 30px 20px;
-    padding: 20px;
-    position: relative;
-    z-index: 1;
-}
-
-.entries-section h2 {
-    color: #FFF8DC;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 1.8em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-}
-
-/* Individual entry styling - wooden theme */
-.entry {
-    background: linear-gradient(135deg, #F5DEB3 0%, #DEB887 50%, #F5DEB3 100%);
-    border: 3px solid #8B4513;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.3),
-        0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease;
-    position: relative;
-}
-
-.entry:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.4),
-        0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Entry content styling - wooden theme */
-.entry-budget {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #8B4513;
-    margin-bottom: 10px;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.entry-list {
-    font-size: 1em;
-    color: #2F4F4F;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-/* Empty state styling - wooden theme */
-.empty-message {
-    text-align: center;
-    color: #8B4513;
-    font-style: italic;
-    padding: 40px;
-    background: linear-gradient(135deg, #F5DEB3 0%, #DEB887 50%, #F5DEB3 100%);
-    border-radius: 8px;
-    border: 2px dashed #8B4513;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
 
 /* Responsive design for mobile devices */
 @media (max-width: 600px) {
