@@ -68,3 +68,25 @@ totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, rec
 const savings = totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
 
 console.log(`You have saved: £${savings[1]} and ${savings[0]} emissions`);
+
+// User input: initial and chosen food
+const initialFood = 'avocados'; // change as needed
+const chosenFood = 'cucumber'; // change as needed
+
+function compareTwoFoods(initialFood, chosenFood, foodTable) {
+    const initial = findPriceAndEmissions(initialFood, foodTable);
+    const chosen = findPriceAndEmissions(chosenFood, foodTable);
+    if (!initial || !chosen) {
+        return null;
+    }
+    const emissionsSavings = Number(initial.emissions) - Number(chosen.emissions);
+    const priceSavings = Number(initial.price) - Number(chosen.price);
+    return { emissionsSavings, priceSavings };
+}
+
+const savings2 = compareTwoFoods(initialFood, chosenFood, foodTable);
+if (savings2) {
+    console.log(`By choosing ${chosenFood} instead of ${initialFood}, you save £${savings2.priceSavings} and ${savings2.emissionsSavings} emissions.`);
+} else {
+    console.log('One or both foods not found in the data.');
+}
