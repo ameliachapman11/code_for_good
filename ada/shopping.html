@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetWise - Shopping List</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Shopping page specific styles */
+        body {
+            background-image: url('./assets/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .shopping-container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+        
+        /* Shopping list paper */
+        .shopping-paper {
+            width: 300px;
+            height: 450px;
+            background: #FFF8DC;
+            border-radius: 15px;
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            transform: rotate(-2deg);
+            border: 3px solid #F5DEB3;
+            margin-left: 30px;
+        }
+        
+        .paper-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #8B4513;
+            padding-bottom: 15px;
+        }
+        
+        .paper-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #8B4513;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .budget-display {
+            font-size: 1.2em;
+            color: #2F4F4F;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+        
+        .shopping-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .shopping-list li {
+            padding: 12px 0;
+            border-bottom: 2px dotted #8B4513;
+            color: #2F4F4F;
+            font-size: 1.2em;
+            position: relative;
+            padding-left: 30px;
+            font-weight: 500;
+        }
+        
+        .shopping-list li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #8B4513;
+            font-size: 1.4em;
+        }
+        
+        .shopping-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Back button */
+        .back-button {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            color: #FFF8DC;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .shopping-container {
+                justify-content: center;
+            }
+            
+            .shopping-paper {
+                width: 280px;
+                height: 400px;
+                padding: 25px;
+                margin-left: 0;
+                transform: rotate(-1deg);
+            }
+            
+            .back-button {
+                top: 20px;
+                left: 20px;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shopping-container">
+        <button class="back-button" onclick="goBack()">← Back to Budget</button>
+        
+        <!-- Shopping list paper -->
+        <div class="shopping-paper">
+            <div class="paper-header">
+                <h2 class="paper-title">Shopping List</h2>
+                <div class="budget-display" id="budgetDisplay">Budget: £0</div>
+            </div>
+            <ul class="shopping-list" id="shoppingList">
+                <!-- Shopping items will be populated by JavaScript -->
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Get budget and shopping list from URL parameters
+        function getUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                budget: urlParams.get('budget') || '0',
+                shoppingList: urlParams.get('list') || ''
+            };
+        }
+        
+        // Display the budget and shopping list
+        function displayShoppingList() {
+            const params = getUrlParameters();
+            
+            // Display budget
+            document.getElementById('budgetDisplay').textContent = `Budget: £${params.budget}`;
+            
+            // Split shopping list by commas and create list items
+            const shoppingListElement = document.getElementById('shoppingList');
+            const items = params.shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
+            
+            if (items.length === 0) {
+                shoppingListElement.innerHTML = '<li>No items in your shopping list</li>';
+            } else {
+                shoppingListElement.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+            }
+        }
+        
+        // Go back to main page
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // Initialize the page when it loads
+        document.addEventListener('DOMContentLoaded', function() {
+            displayShoppingList();
+        });
+    </script>
+</body>
+</html>
