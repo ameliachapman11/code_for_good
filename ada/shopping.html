@@ -218,7 +218,7 @@
             <!-- Loading overlay that shows while AI processes the shopping list -->
             <div id="loadingOverlay" class="loading-overlay">
                 <div class="loading-spinner"></div>
-                <div class="loading-text">AI is cleaning up your shopping list...</div>
+                <div class="loading-text">Filtering your list...</div>
             </div>
             
             <!-- Header section of the paper with title and budget -->
@@ -246,150 +246,129 @@
         }
         
         // AI cleanup function that processes and validates the shopping list
-        // This uses Google AI to clean up grammar, remove invalid items, and standardize format
+        // This uses Claude AI to clean up grammar, remove invalid items, and standardize format
         async function cleanupShoppingList(shoppingList) {
-            try {
-                // Use Google AI API for all cleanup tasks
-                const cleanedItems = await callAIAPI(shoppingList);
-                return cleanedItems;
-                
-            } catch (error) {
-                // If AI fails, use basic fallback processing
-                console.log('🔄 Google AI API failed, using basic fallback processing');
-                
-                // Basic cleanup without AI
-                const items = shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
-                
-                // Basic grocery item validation and cleanup
-                const groceryItems = items.filter(item => {
-                    const lowerItem = item.toLowerCase();
-                    // Remove obvious non-grocery items
-                    const nonGrocery = ['car', 'phone', 'computer', 'book', 'toy', 'game', 'clothes', 'shoes', 'house', 'apartment'];
-                    return !nonGrocery.some(nonGrocery => lowerItem.includes(nonGrocery));
-                });
-                
-                // Basic pluralization for duplicates
-                const itemCounts = {};
-                groceryItems.forEach(item => {
-                    const lowerItem = item.toLowerCase();
-                    itemCounts[lowerItem] = (itemCounts[lowerItem] || 0) + 1;
-                });
-                
-                const result = [];
-                Object.keys(itemCounts).forEach(item => {
-                    const count = itemCounts[item];
-                    const capitalized = item.charAt(0).toUpperCase() + item.slice(1);
-                    
-                    if (count > 1) {
-                        // Simple pluralization
-                        if (item.endsWith('y')) {
-                            result.push(capitalized.slice(0, -1) + 'ies');
-                        } else if (item.endsWith('s') || item.endsWith('sh') || item.endsWith('ch')) {
-                            result.push(capitalized + 'es');
-                        } else {
-                            result.push(capitalized + 's');
-                        }
-                    } else {
-                        result.push(capitalized);
-                    }
-                });
-                
-                console.log('📝 Basic fallback result:', result);
-                return result;
-            }
+            // Only use Claude AI for all cleanup tasks - no fallback processing
+            console.log('🤖 Using Claude AI to filter and clean your shopping list');
+            const cleanedItems = await callAIAPI(shoppingList);
+            return cleanedItems;
         }
         
-        // Real AI API call function using Google AI Studio (Gemini)
+        // Real AI API call function using Anthropic Claude API
         async function callAIAPI(shoppingList) {
-            // Get your free API key from: https://makersuite.google.com/app/apikey
-            const API_KEY = 'AIzaSyB6A1MUJL5SunCDI7BdhxZLrxNBZ0G0d_o'; // Replace with your actual Google AI API key
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+            // Get your API key from: https://console.anthropic.com/
+            const API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE'; // Replace with your actual Anthropic API key
+            const API_URL = 'https://api.anthropic.com/v1/messages';
             
-            console.log('🤖 Calling Google AI API with list:', shoppingList);
+            console.log('🤖 Calling Anthropic Claude API with list:', shoppingList);
+            console.log('🔑 Using API endpoint:', API_URL);
             
-            const prompt = `Please clean up this shopping list for a UK grocery store. Be thorough and intelligent in your processing.
+            const prompt = `You are an intelligent shopping list parser for a UK grocery store. Your job is to understand what the user actually wants to buy, even if they write it poorly.
 
-Original list: "${shoppingList}"
+Original input: "${shoppingList}"
 
-Your tasks:
-1. GRAMMAR & SPELLING: Fix all grammar mistakes, typos, and spelling errors
-2. REMOVE NON-GROCERY ITEMS: Remove anything that cannot be found in a grocery store (cars, phones, clothes, books, toys, electronics, etc.)
-3. UK TERMINOLOGY: Convert to British English (e.g., "cookies" → "biscuits", "soda" → "soft drinks", "candy" → "sweets")
-4. COMBINE DUPLICATES: If the same item appears multiple times, combine them into one entry in plural form
-5. PROPER CAPITALIZATION: Capitalize each item correctly
-6. STANDARDIZE NAMES: Use proper grocery store names (e.g., "milk" not "milks", "bread" not "breads")
-7. REMOVE FILLER WORDS: Remove words like "please", "buy", "get", "need", "want", "some", "any"
+CRITICAL PARSING RULES:
+1. SMART SEPARATION: Understand what are separate items vs. parts of one item name
+   - "beans. bug" = "Beans, Bug" (two separate items)
+   - "green beans" = "Green beans" (one item with descriptor)
+   - "car car apples" = "Apples" (ignore non-grocery, keep grocery)
+   - "apple pie" = "Apple pie" (one item)
+   - "apple, pie" = "Apple, Pie" (two separate items)
 
-Examples of what to do:
-- "apple, apple, apple" → "Apples"
-- "milk, milks, milk" → "Milk" 
-- "cookies" → "Biscuits"
-- "soda" → "Soft drinks"
-- "car, apple, phone" → "Apples"
-- "please buy apples" → "Apples"
+2. INTELLIGENT PARSING: Look for natural separators and context
+   - Commas, periods, semicolons, "and", "&" = separate items
+   - Spaces within descriptive names = one item
+   - Numbers + items = one item (e.g., "2 apples" = "Apples")
 
-Return ONLY the cleaned grocery items as a comma-separated string. Do not include any explanations or additional text.`;
+3. CONTEXT UNDERSTANDING: Use grocery store knowledge
+   - "beans" = grocery item
+   - "bug" = not a grocery item (remove)
+   - "car" = not a grocery item (remove)
+   - "green beans" = one grocery item
+   - "baked beans" = one grocery item
+
+YOUR TASKS:
+1. PARSE CORRECTLY: Identify separate grocery items vs. single items with descriptors
+2. GRAMMAR & SPELLING: Fix all mistakes and typos
+3. REMOVE NON-GROCERY: Remove cars, phones, bugs, toys, electronics, etc.
+4. UK TERMINOLOGY: Convert to British English (cookies→biscuits, soda→soft drinks)
+5. COMBINE DUPLICATES: If same item appears multiple times, make it plural
+6. PROPER CAPITALIZATION: Capitalize correctly
+7. STANDARDIZE NAMES: Use proper grocery store names
+
+EXAMPLES:
+- "car car apples" → "Apples"
+- "beans. bug" → "Beans"
+- "green beans, baked beans" → "Green beans, Baked beans"
+- "apple pie, apple" → "Apple pie, Apple"
+- "2 apples, 3 bananas" → "Apples, Bananas"
+- "cookies, soda" → "Biscuits, Soft drinks"
+- "please buy milk and bread" → "Milk, Bread"
+
+Return ONLY the cleaned grocery items as a comma-separated string. No explanations.`;
             
             try {
-                console.log('📡 Making API request to:', API_URL);
+                console.log('📡 Making API request to Anthropic Claude');
                 
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-api-key': API_KEY,
+                        'anthropic-version': '2023-06-01'
                     },
                     body: JSON.stringify({
-                        contents: [
+                        model: 'claude-3-sonnet-20240229',
+                        max_tokens: 500,
+                        temperature: 0.3,
+                        messages: [
                             {
-                                parts: [
-                                    {
-                                        text: prompt
-                                    }
-                                ]
+                                role: 'user',
+                                content: prompt
                             }
-                        ],
-                        generationConfig: {
-                            temperature: 0.3,
-                            maxOutputTokens: 500,
-                            topP: 0.8,
-                            topK: 10
-                        }
+                        ]
                     })
                 });
-                
-                console.log('📊 API Response status:', response.status);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('❌ API Error Response:', errorText);
-                    throw new Error(`Google AI API error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
-                }
-                
-                const data = await response.json();
-                console.log('✅ API Response data:', data);
-                
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                    console.error('❌ Invalid API response structure:', data);
-                    throw new Error('Invalid response from Google AI API');
-                }
-                
-                const cleanedText = data.candidates[0].content.parts[0].text.trim();
-                console.log('🧹 AI cleaned text:', cleanedText);
-                
-                // Split the AI response into individual items
-                const result = cleanedText.split(',').map(item => item.trim()).filter(item => item.length > 0);
-                console.log('📝 Final processed items:', result);
-                return result;
-                
+                    
+                    console.log('📊 API Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('❌ API Error Response:', errorText);
+                        throw new Error(`Anthropic Claude API error: ${response.status} - ${response.statusText}. Details: ${errorText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('✅ API Response data:', data);
+                    
+                    if (!data.content || !data.content[0] || !data.content[0].text) {
+                        console.error('❌ Invalid API response structure:', data);
+                        throw new Error('Invalid response from Anthropic Claude API');
+                    }
+                    
+                    const cleanedText = data.content[0].text.trim();
+                    console.log('🧹 AI cleaned text:', cleanedText);
+                    
+                    // Split the AI response into individual items - handle periods too
+                    const result = cleanedText.split(/[,;]/).map(item => {
+                        // Also split on periods if they're clearly separators
+                        return item.split('.').map(subItem => subItem.trim()).filter(subItem => subItem.length > 0);
+                    }).flat().filter(item => item.length > 0);
+                    
+                    console.log('📝 Final processed items:', result);
+                    return result;
+                    
             } catch (error) {
-                console.error('❌ Google AI API call failed:', error);
+                console.error('❌ Anthropic Claude API call failed:', error);
+                console.error('❌ Error details:', error.message);
+                console.error('❌ Error stack:', error.stack);
                 console.log('🔄 Falling back to basic processing...');
                 throw error;
             }
         }
         
         
-        // Main function that displays the budget and processes the shopping list with AI
+        // Main function that displays the budget and processes the shopping list with Claude AI
         async function displayShoppingList() {
             // Get the budget and shopping list from URL parameters
             const params = getUrlParameters();
@@ -397,8 +376,12 @@ Return ONLY the cleaned grocery items as a comma-separated string. Do not includ
             // Display the budget amount at the top of the paper
             document.getElementById('budgetDisplay').textContent = `Budget: £${params.budget}`;
             
+            // Show loading overlay immediately
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
             try {
-                // Clean up the shopping list using AI processing
+                // Clean up the shopping list using Claude AI only
+                console.log('🚀 Starting Claude AI filtering process...');
                 const cleanedItems = await cleanupShoppingList(params.shoppingList);
                 
                 // Hide the loading overlay since processing is complete
@@ -413,12 +396,15 @@ Return ONLY the cleaned grocery items as a comma-separated string. Do not includ
                     // Create list items for each cleaned grocery item
                     shoppingListElement.innerHTML = cleanedItems.map(item => `<li>${item}</li>`).join('');
                 }
+                
+                console.log('✅ Claude AI filtering completed successfully');
             } catch (error) {
                 // Handle any errors that occur during AI processing
+                console.error('❌ Claude AI filtering failed:', error);
                 // Hide loading overlay and show error message
                 document.getElementById('loadingOverlay').style.display = 'none';
                 const shoppingListElement = document.getElementById('shoppingList');
-                shoppingListElement.innerHTML = '<li>Error processing your shopping list. Please try again.</li>';
+                shoppingListElement.innerHTML = '<li>Error filtering your shopping list. Please try again.</li>';
             }
         }
         
