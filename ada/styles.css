@@ -1,38 +1,43 @@
-/* Reset default browser styles */
+/* BudgetWise - Main CSS Stylesheet */
+/* This file contains all the styling for the BudgetWise application */
+
+/* Reset default browser styles to ensure consistent appearance across browsers */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    margin: 0; /* Remove default margins */
+    padding: 0; /* Remove default padding */
+    box-sizing: border-box; /* Include padding and border in element's total width and height */
 }
 
 /* Body styling with background image */
+/* This sets up the main page background and typography */
 body {
-    background-image: url(./assets/background_2.png);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh;
-    font-family: 'Arial', sans-serif;
-    color: #333;
-    line-height: 1.6;
+    background-image: url(./assets/background_2.png); /* Forest background image */
+    background-size: cover; /* Scale image to cover entire viewport */
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat; /* Don't repeat the background image */
+    background-attachment: fixed; /* Keep background fixed when scrolling */
+    min-height: 100vh; /* Ensure body takes up at least full viewport height */
+    font-family: 'Arial', sans-serif; /* Set default font family */
+    color: #333; /* Set default text color to dark gray */
+    line-height: 1.6; /* Set line height for better readability */
 }
 
 /* Main container - wooden board design */
+/* This creates the main wooden board that contains the form */
 .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0;
-    background: linear-gradient(135deg, #8B4513 0%, #A0522D 25%, #8B4513 50%, #A0522D 75%, #8B4513 100%);
-    background-size: 20px 20px;
-    margin-top: 20px;
-    border-radius: 15px;
-    border: 6px solid #654321;
+    max-width: 800px; /* Limit maximum width for better readability */
+    margin: 0 auto; /* Center the container horizontally */
+    padding: 0; /* No internal padding */
+    background: linear-gradient(135deg, #8B4513 0%, #A0522D 25%, #8B4513 50%, #A0522D 75%, #8B4513 100%); /* Wood grain gradient */
+    background-size: 20px 20px; /* Size of the gradient pattern */
+    margin-top: 20px; /* Space from top of viewport */
+    border-radius: 15px; /* Rounded corners */
+    border: 6px solid #654321; /* Dark brown border */
     box-shadow: 
-        inset 0 4px 8px rgba(0, 0, 0, 0.3),
-        0 8px 16px rgba(0, 0, 0, 0.4);
-    position: relative;
-    overflow: hidden;
+        inset 0 4px 8px rgba(0, 0, 0, 0.3), /* Inner shadow for depth */
+        0 8px 16px rgba(0, 0, 0, 0.4); /* Outer shadow for elevation */
+    position: relative; /* Needed for pseudo-element positioning */
+    overflow: hidden; /* Hide any content that overflows the container */
 }
 
 /* Add wood grain texture overlay to main container */

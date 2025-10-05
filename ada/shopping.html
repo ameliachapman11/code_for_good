@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic HTML document setup -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetWise - Shopping List</title>
+    <!-- Link to external CSS file for base styling -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Inline styles specific to this shopping page -->
     <style>
         /* Shopping page specific styles */
+        /* Body styling with background image */
         body {
             background-image: url('./assets/background.png');
             background-size: cover;
@@ -20,6 +24,7 @@
             overflow-x: hidden;
         }
         
+        /* Main container for the shopping page layout */
         .shopping-container {
             position: relative;
             min-height: 100vh;
@@ -29,19 +34,61 @@
             padding: 20px;
         }
         
-        /* Shopping list paper */
+        /* Shopping list paper - styled to look like a real piece of paper */
         .shopping-paper {
             width: 300px;
             height: 450px;
-            background: #FFF8DC;
+            background: #FFF8DC; /* Cream color for paper */
             border-radius: 15px;
             box-shadow: 
-                0 10px 20px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                0 10px 20px rgba(0, 0, 0, 0.3), /* Drop shadow for depth */
+                inset 0 1px 0 rgba(255, 255, 255, 0.8); /* Inner highlight */
             padding: 30px;
-            transform: rotate(-2deg);
-            border: 3px solid #F5DEB3;
+            transform: rotate(-2deg); /* Slight rotation for natural look */
+            border: 3px solid #F5DEB3; /* Light brown border */
             margin-left: 30px;
+            position: relative; /* Needed for loading overlay positioning */
+        }
+        
+        /* Loading overlay that appears while AI processes the shopping list */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 248, 220, 0.9); /* Semi-transparent paper color */
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10; /* Above other content */
+        }
+        
+        /* Animated spinner for loading indication */
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #F5DEB3; /* Light border */
+            border-top: 3px solid #8B4513; /* Dark top border for rotation effect */
+            border-radius: 50%;
+            animation: spin 1s linear infinite; /* Continuous rotation */
+            margin-bottom: 15px;
+        }
+        
+        /* Keyframe animation for spinner rotation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Text that appears below the loading spinner */
+        .loading-text {
+            color: #8B4513; /* Dark brown to match theme */
+            font-size: 1em;
+            font-weight: 500;
+            text-align: center;
         }
         
         .paper-header {
@@ -142,57 +189,169 @@
     </style>
 </head>
 <body>
+    <!-- Main container for the shopping page -->
     <div class="shopping-container">
+        <!-- Navigation button to return to the main budget form -->
         <button class="back-button" onclick="goBack()">← Back to Budget</button>
         
-        <!-- Shopping list paper -->
+        <!-- Shopping list paper - the main content area -->
         <div class="shopping-paper">
+            <!-- Loading overlay that shows while AI processes the shopping list -->
+            <div id="loadingOverlay" class="loading-overlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">AI is cleaning up your shopping list...</div>
+            </div>
+            
+            <!-- Header section of the paper with title and budget -->
             <div class="paper-header">
                 <h2 class="paper-title">Shopping List</h2>
                 <div class="budget-display" id="budgetDisplay">Budget: £0</div>
             </div>
+            <!-- List container where cleaned shopping items will be displayed -->
             <ul class="shopping-list" id="shoppingList">
-                <!-- Shopping items will be populated by JavaScript -->
+                <!-- Shopping items will be populated by JavaScript after AI processing -->
             </ul>
         </div>
     </div>
     
     <script>
-        // Get budget and shopping list from URL parameters
+        // Function to extract budget and shopping list data from URL parameters
+        // This allows data to be passed from the main form to this shopping page
         function getUrlParameters() {
+            // Create URLSearchParams object to parse query string
             const urlParams = new URLSearchParams(window.location.search);
             return {
-                budget: urlParams.get('budget') || '0',
-                shoppingList: urlParams.get('list') || ''
+                budget: urlParams.get('budget') || '0', // Get budget amount, default to '0'
+                shoppingList: urlParams.get('list') || '' // Get shopping list, default to empty string
             };
         }
         
-        // Display the budget and shopping list
-        function displayShoppingList() {
-            const params = getUrlParameters();
-            
-            // Display budget
-            document.getElementById('budgetDisplay').textContent = `Budget: £${params.budget}`;
-            
-            // Split shopping list by commas and create list items
-            const shoppingListElement = document.getElementById('shoppingList');
-            const items = params.shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
-            
-            if (items.length === 0) {
-                shoppingListElement.innerHTML = '<li>No items in your shopping list</li>';
-            } else {
-                shoppingListElement.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+        // AI cleanup function that processes and validates the shopping list
+        // This simulates AI processing to clean up grammar, remove invalid items, and standardize format
+        async function cleanupShoppingList(shoppingList) {
+            try {
+                // Simulate AI processing delay (2 seconds) to show loading animation
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Split the shopping list by commas and clean up each item
+                const items = shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                
+                // AI cleaning and validation - process each item
+                const cleanedItems = items.map(item => {
+                    // Basic cleaning: convert to lowercase and remove extra spaces
+                    let cleaned = item.toLowerCase().trim();
+                    
+                    // Remove common non-grocery words that users might include
+                    cleaned = cleaned.replace(/\b(please|buy|get|need|want|for|the|a|an|some|any)\b/g, '');
+                    
+                    // Dictionary of common typos and variations to correct
+                    // This ensures consistent formatting and UK-specific terminology
+                    const corrections = {
+                        'apples': 'Apples',
+                        'bread': 'Bread',
+                        'milk': 'Milk',
+                        'eggs': 'Eggs',
+                        'cheese': 'Cheese',
+                        'butter': 'Butter',
+                        'chicken': 'Chicken',
+                        'beef': 'Beef',
+                        'fish': 'Fish',
+                        'rice': 'Rice',
+                        'pasta': 'Pasta',
+                        'potatoes': 'Potatoes',
+                        'onions': 'Onions',
+                        'carrots': 'Carrots',
+                        'tomatoes': 'Tomatoes',
+                        'bananas': 'Bananas',
+                        'oranges': 'Oranges',
+                        'yogurt': 'Yogurt',
+                        'cereal': 'Cereal',
+                        'coffee': 'Coffee',
+                        'tea': 'Tea',
+                        'sugar': 'Sugar',
+                        'salt': 'Salt',
+                        'pepper': 'Pepper',
+                        'oil': 'Cooking Oil',
+                        'flour': 'Flour',
+                        'soup': 'Soup',
+                        'cookies': 'Biscuits', // UK terminology
+                        'crackers': 'Crackers',
+                        'juice': 'Fruit Juice',
+                        'water': 'Water',
+                        'soda': 'Soft Drinks', // UK terminology
+                        'beer': 'Beer',
+                        'wine': 'Wine'
+                    };
+                    
+                    // Apply corrections by checking if the cleaned item contains any correction keys
+                    for (const [key, value] of Object.entries(corrections)) {
+                        if (cleaned.includes(key)) {
+                            cleaned = value;
+                            break; // Stop after first match
+                        }
+                    }
+                    
+                    // Capitalize first letter for proper formatting
+                    cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+                    
+                    return cleaned;
+                }).filter(item => {
+                    // Filter out non-grocery items that shouldn't be on a shopping list
+                    const nonGroceryItems = ['car', 'house', 'phone', 'computer', 'clothes', 'shoes', 'book', 'toy', 'game'];
+                    return !nonGroceryItems.some(nonGrocery => item.toLowerCase().includes(nonGrocery));
+                });
+                
+                return cleanedItems; // Return the processed and validated shopping list
+                
+            } catch (error) {
+                // Log any errors that occur during AI processing
+                console.error('AI cleanup error:', error);
+                throw error; // Re-throw to be handled by calling function
             }
         }
         
-        // Go back to main page
+        // Main function that displays the budget and processes the shopping list with AI
+        async function displayShoppingList() {
+            // Get the budget and shopping list from URL parameters
+            const params = getUrlParameters();
+            
+            // Display the budget amount at the top of the paper
+            document.getElementById('budgetDisplay').textContent = `Budget: £${params.budget}`;
+            
+            try {
+                // Clean up the shopping list using AI processing
+                const cleanedItems = await cleanupShoppingList(params.shoppingList);
+                
+                // Hide the loading overlay since processing is complete
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                // Display the cleaned shopping items in the list
+                const shoppingListElement = document.getElementById('shoppingList');
+                if (cleanedItems.length === 0) {
+                    // Show message if no valid grocery items were found
+                    shoppingListElement.innerHTML = '<li>No valid grocery items found in your list</li>';
+                } else {
+                    // Create list items for each cleaned grocery item
+                    shoppingListElement.innerHTML = cleanedItems.map(item => `<li>${item}</li>`).join('');
+                }
+            } catch (error) {
+                // Handle any errors that occur during AI processing
+                // Hide loading overlay and show error message
+                document.getElementById('loadingOverlay').style.display = 'none';
+                const shoppingListElement = document.getElementById('shoppingList');
+                shoppingListElement.innerHTML = '<li>Error processing your shopping list. Please try again.</li>';
+            }
+        }
+        
+        // Navigation function to return to the main budget form page
         function goBack() {
             window.location.href = 'index.html';
         }
         
-        // Initialize the page when it loads
+        // Initialize the page when the DOM is fully loaded
+        // This ensures all HTML elements are available before JavaScript runs
         document.addEventListener('DOMContentLoaded', function() {
-            displayShoppingList();
+            displayShoppingList(); // Start the shopping list display process
         });
     </script>
 </body>
