@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Basic HTML document setup -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BudgetWise - Smart Food Planning</title>
+    <!-- Link to external CSS file for styling -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Main container for the page -->
+    <!-- Main container that holds all page content -->
     <div class="container">
-        <!-- Page header -->
+        <!-- Page header section with title and subtitle -->
         <h1>BudgetWise</h1>
         <p class="subtitle">Smart Food Planning for Financial Wellness</p>
         
-        <!-- Form for entering budget and shopping list -->
+        <!-- Main form for user input - this is the core functionality -->
         <form id="budgetForm" class="budget-form">
-            <!-- Budget input field -->
+            <!-- Budget input section -->
             <div class="form-group">
+                <!-- Label for accessibility and user guidance -->
                 <label for="budget">Food Budget (£):</label>
+                <!-- Number input field for budget amount -->
                 <input 
                     type="number" 
                     id="budget" 
@@ -29,9 +33,11 @@
                 >
             </div>
             
-            <!-- Shopping list textarea -->
+            <!-- Shopping list input section -->
             <div class="form-group">
+                <!-- Label for accessibility and user guidance -->
                 <label for="shoppingList">Shopping List:</label>
+                <!-- Textarea for multi-line shopping list input -->
                 <textarea 
                     id="shoppingList" 
                     name="shoppingList" 
@@ -41,13 +47,13 @@
                 ></textarea>
             </div>
             
-            <!-- Submit button -->
+            <!-- Submit button to process the form -->
             <button type="submit" class="submit-btn">Submit</button>
         </form>
         
     </div>
     
-    <!-- Link to JavaScript file -->
+    <!-- Link to JavaScript file for form functionality -->
     <script src="script.js"></script>
 </body>
 </html>
