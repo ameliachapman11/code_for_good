@@ -115,30 +115,49 @@
         
         .shopping-list {
             list-style: none;
-            padding: 0;
+            padding: 15px;
             margin: 0;
+            max-height: 280px; /* Limit height to make it scrollable */
+            overflow-y: auto; /* Enable vertical scrolling */
+            background: #FFF8DC; /* Same color as paper */
+            border: 2px solid #8B4513; /* Dark brown border like a text field */
+            border-radius: 8px; /* Rounded corners to match paper */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Inner shadow for field effect */
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
         }
         
         .shopping-list li {
-            padding: 12px 0;
-            border-bottom: 2px dotted #8B4513;
+            padding: 4px 0;
             color: #2F4F4F;
-            font-size: 1.2em;
-            position: relative;
-            padding-left: 30px;
+            font-size: 1em;
             font-weight: 500;
-        }
-        
-        .shopping-list li:before {
-            content: "☐";
-            position: absolute;
-            left: 0;
-            color: #8B4513;
-            font-size: 1.4em;
+            border-bottom: none; /* Remove lines between items */
+            margin-bottom: 2px;
         }
         
         .shopping-list li:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        /* Custom scrollbar styling to match the paper theme */
+        .shopping-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .shopping-list::-webkit-scrollbar-track {
+            background: #F5DEB3; /* Light brown track */
+            border-radius: 4px;
+        }
+        
+        .shopping-list::-webkit-scrollbar-thumb {
+            background: #8B4513; /* Dark brown thumb */
+            border-radius: 4px;
+        }
+        
+        .shopping-list::-webkit-scrollbar-thumb:hover {
+            background: #654321; /* Darker brown on hover */
         }
         
         /* Back button */
@@ -227,88 +246,95 @@
         }
         
         // AI cleanup function that processes and validates the shopping list
-        // This simulates AI processing to clean up grammar, remove invalid items, and standardize format
+        // This uses Google AI to clean up grammar, remove invalid items, and standardize format
         async function cleanupShoppingList(shoppingList) {
             try {
-                // Simulate AI processing delay (2 seconds) to show loading animation
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // Split the shopping list by commas and clean up each item
-                const items = shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
-                
-                // AI cleaning and validation - process each item
-                const cleanedItems = items.map(item => {
-                    // Basic cleaning: convert to lowercase and remove extra spaces
-                    let cleaned = item.toLowerCase().trim();
-                    
-                    // Remove common non-grocery words that users might include
-                    cleaned = cleaned.replace(/\b(please|buy|get|need|want|for|the|a|an|some|any)\b/g, '');
-                    
-                    // Dictionary of common typos and variations to correct
-                    // This ensures consistent formatting and UK-specific terminology
-                    const corrections = {
-                        'apples': 'Apples',
-                        'bread': 'Bread',
-                        'milk': 'Milk',
-                        'eggs': 'Eggs',
-                        'cheese': 'Cheese',
-                        'butter': 'Butter',
-                        'chicken': 'Chicken',
-                        'beef': 'Beef',
-                        'fish': 'Fish',
-                        'rice': 'Rice',
-                        'pasta': 'Pasta',
-                        'potatoes': 'Potatoes',
-                        'onions': 'Onions',
-                        'carrots': 'Carrots',
-                        'tomatoes': 'Tomatoes',
-                        'bananas': 'Bananas',
-                        'oranges': 'Oranges',
-                        'yogurt': 'Yogurt',
-                        'cereal': 'Cereal',
-                        'coffee': 'Coffee',
-                        'tea': 'Tea',
-                        'sugar': 'Sugar',
-                        'salt': 'Salt',
-                        'pepper': 'Pepper',
-                        'oil': 'Cooking Oil',
-                        'flour': 'Flour',
-                        'soup': 'Soup',
-                        'cookies': 'Biscuits', // UK terminology
-                        'crackers': 'Crackers',
-                        'juice': 'Fruit Juice',
-                        'water': 'Water',
-                        'soda': 'Soft Drinks', // UK terminology
-                        'beer': 'Beer',
-                        'wine': 'Wine'
-                    };
-                    
-                    // Apply corrections by checking if the cleaned item contains any correction keys
-                    for (const [key, value] of Object.entries(corrections)) {
-                        if (cleaned.includes(key)) {
-                            cleaned = value;
-                            break; // Stop after first match
-                        }
-                    }
-                    
-                    // Capitalize first letter for proper formatting
-                    cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-                    
-                    return cleaned;
-                }).filter(item => {
-                    // Filter out non-grocery items that shouldn't be on a shopping list
-                    const nonGroceryItems = ['car', 'house', 'phone', 'computer', 'clothes', 'shoes', 'book', 'toy', 'game'];
-                    return !nonGroceryItems.some(nonGrocery => item.toLowerCase().includes(nonGrocery));
-                });
-                
-                return cleanedItems; // Return the processed and validated shopping list
+                // Use Google AI API for all cleanup tasks
+                const cleanedItems = await callAIAPI(shoppingList);
+                return cleanedItems;
                 
             } catch (error) {
-                // Log any errors that occur during AI processing
-                console.error('AI cleanup error:', error);
-                throw error; // Re-throw to be handled by calling function
+                // If AI fails, return the original list split by commas as fallback
+                console.log('Google AI API failed, using basic fallback');
+                return shoppingList.split(',').map(item => item.trim()).filter(item => item.length > 0);
             }
         }
+        
+        // Real AI API call function using Google AI Studio (Gemini)
+        async function callAIAPI(shoppingList) {
+            // Get your free API key from: https://makersuite.google.com/app/apikey
+            const API_KEY = 'AIzaSyB6A1MUJL5SunCDI7BdhxZLrxNBZ0G0d_o'; // Replace with your actual Google AI API key
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`;
+            
+            const prompt = `Please clean up this shopping list for a UK grocery store. Be thorough and intelligent in your processing.
+
+Original list: "${shoppingList}"
+
+Your tasks:
+1. GRAMMAR & SPELLING: Fix all grammar mistakes, typos, and spelling errors
+2. REMOVE NON-GROCERY ITEMS: Remove anything that cannot be found in a grocery store (cars, phones, clothes, books, toys, electronics, etc.)
+3. UK TERMINOLOGY: Convert to British English (e.g., "cookies" → "biscuits", "soda" → "soft drinks", "candy" → "sweets")
+4. COMBINE DUPLICATES: If the same item appears multiple times, combine them into one entry in plural form
+5. PROPER CAPITALIZATION: Capitalize each item correctly
+6. STANDARDIZE NAMES: Use proper grocery store names (e.g., "milk" not "milks", "bread" not "breads")
+7. REMOVE FILLER WORDS: Remove words like "please", "buy", "get", "need", "want", "some", "any"
+
+Examples of what to do:
+- "apple, apple, apple" → "Apples"
+- "milk, milks, milk" → "Milk" 
+- "cookies" → "Biscuits"
+- "soda" → "Soft drinks"
+- "car, apple, phone" → "Apples"
+- "please buy apples" → "Apples"
+
+Return ONLY the cleaned grocery items as a comma-separated string. Do not include any explanations or additional text.`;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: prompt
+                                    }
+                                ]
+                            }
+                        ],
+                        generationConfig: {
+                            temperature: 0.3,
+                            maxOutputTokens: 500,
+                            topP: 0.8,
+                            topK: 10
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Google AI API error: ${response.status} - ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Invalid response from Google AI API');
+                }
+                
+                const cleanedText = data.candidates[0].content.parts[0].text.trim();
+                
+                // Split the AI response into individual items
+                return cleanedText.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                
+            } catch (error) {
+                console.error('Google AI API call failed:', error);
+                throw error;
+            }
+        }
+        
         
         // Main function that displays the budget and processes the shopping list with AI
         async function displayShoppingList() {
