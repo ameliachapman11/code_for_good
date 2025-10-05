@@ -254,79 +254,25 @@
             return cleanedItems;
         }
         
-        // Real AI API call function using Anthropic Claude API
+        // Real AI API call function using proxy server to avoid CORS issues
         async function callAIAPI(shoppingList) {
-            // Get your API key from: https://console.anthropic.com/
-            const API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE'; // Replace with your actual Anthropic API key
-            const API_URL = 'https://api.anthropic.com/v1/messages';
+            // Use local proxy server to avoid CORS issues
+            const PROXY_URL = 'http://localhost:3001/api/claude';
             
-            console.log('🤖 Calling Anthropic Claude API with list:', shoppingList);
-            console.log('🔑 Using API endpoint:', API_URL);
+            console.log('🤖 Calling Claude AI via proxy server with list:', shoppingList);
+            console.log('🔑 Using proxy endpoint:', PROXY_URL);
             
-            const prompt = `You are an intelligent shopping list parser for a UK grocery store. Your job is to understand what the user actually wants to buy, even if they write it poorly.
-
-Original input: "${shoppingList}"
-
-CRITICAL PARSING RULES:
-1. SMART SEPARATION: Understand what are separate items vs. parts of one item name
-   - "beans. bug" = "Beans, Bug" (two separate items)
-   - "green beans" = "Green beans" (one item with descriptor)
-   - "car car apples" = "Apples" (ignore non-grocery, keep grocery)
-   - "apple pie" = "Apple pie" (one item)
-   - "apple, pie" = "Apple, Pie" (two separate items)
-
-2. INTELLIGENT PARSING: Look for natural separators and context
-   - Commas, periods, semicolons, "and", "&" = separate items
-   - Spaces within descriptive names = one item
-   - Numbers + items = one item (e.g., "2 apples" = "Apples")
-
-3. CONTEXT UNDERSTANDING: Use grocery store knowledge
-   - "beans" = grocery item
-   - "bug" = not a grocery item (remove)
-   - "car" = not a grocery item (remove)
-   - "green beans" = one grocery item
-   - "baked beans" = one grocery item
-
-YOUR TASKS:
-1. PARSE CORRECTLY: Identify separate grocery items vs. single items with descriptors
-2. GRAMMAR & SPELLING: Fix all mistakes and typos
-3. REMOVE NON-GROCERY: Remove cars, phones, bugs, toys, electronics, etc.
-4. UK TERMINOLOGY: Convert to British English (cookies→biscuits, soda→soft drinks)
-5. COMBINE DUPLICATES: If same item appears multiple times, make it plural
-6. PROPER CAPITALIZATION: Capitalize correctly
-7. STANDARDIZE NAMES: Use proper grocery store names
-
-EXAMPLES:
-- "car car apples" → "Apples"
-- "beans. bug" → "Beans"
-- "green beans, baked beans" → "Green beans, Baked beans"
-- "apple pie, apple" → "Apple pie, Apple"
-- "2 apples, 3 bananas" → "Apples, Bananas"
-- "cookies, soda" → "Biscuits, Soft drinks"
-- "please buy milk and bread" → "Milk, Bread"
-
-Return ONLY the cleaned grocery items as a comma-separated string. No explanations.`;
             
             try {
-                console.log('📡 Making API request to Anthropic Claude');
+                console.log('📡 Making API request via proxy server');
                 
-                const response = await fetch(API_URL, {
+                const response = await fetch(PROXY_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': API_KEY,
-                        'anthropic-version': '2023-06-01'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'claude-3-sonnet-20240229',
-                        max_tokens: 500,
-                        temperature: 0.3,
-                        messages: [
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ]
+                        shoppingList: shoppingList
                     })
                 });
                     
@@ -339,22 +285,14 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                     }
                     
                     const data = await response.json();
-                    console.log('✅ API Response data:', data);
+                    console.log('✅ Proxy Response data:', data);
                     
-                    if (!data.content || !data.content[0] || !data.content[0].text) {
-                        console.error('❌ Invalid API response structure:', data);
-                        throw new Error('Invalid response from Anthropic Claude API');
+                    if (!data.success || !data.items) {
+                        console.error('❌ Invalid proxy response structure:', data);
+                        throw new Error('Invalid response from proxy server');
                     }
                     
-                    const cleanedText = data.content[0].text.trim();
-                    console.log('🧹 AI cleaned text:', cleanedText);
-                    
-                    // Split the AI response into individual items - handle periods too
-                    const result = cleanedText.split(/[,;]/).map(item => {
-                        // Also split on periods if they're clearly separators
-                        return item.split('.').map(subItem => subItem.trim()).filter(subItem => subItem.length > 0);
-                    }).flat().filter(item => item.length > 0);
-                    
+                    const result = data.items;
                     console.log('📝 Final processed items:', result);
                     return result;
                     
@@ -362,7 +300,16 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                 console.error('❌ Anthropic Claude API call failed:', error);
                 console.error('❌ Error details:', error.message);
                 console.error('❌ Error stack:', error.stack);
-                console.log('🔄 Falling back to basic processing...');
+                
+                // Show more specific error information
+                if (error.message.includes('401')) {
+                    console.error('🔑 API Key issue - check your Anthropic API key');
+                } else if (error.message.includes('429')) {
+                    console.error('⏰ Rate limit exceeded - try again later');
+                } else if (error.message.includes('CORS')) {
+                    console.error('🌐 CORS error - API call blocked by browser');
+                }
+                
                 throw error;
             }
         }
