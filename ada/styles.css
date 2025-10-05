@@ -1,5 +1,5 @@
-/* BudgetWise - Main CSS Stylesheet */
-/* This file contains all the styling for the BudgetWise application */
+/* Green Grocer - Main CSS Stylesheet */
+/* This file contains all the styling for the Green Grocer application */
 
 /* Reset default browser styles to ensure consistent appearance across browsers */
 * {
@@ -17,7 +17,9 @@ body {
     background-repeat: no-repeat; /* Don't repeat the background image */
     background-attachment: fixed; /* Keep background fixed when scrolling */
     min-height: 100vh; /* Ensure body takes up at least full viewport height */
-    font-family: 'Arial', sans-serif; /* Set default font family */
+    /* font-family: 'Arial', sans-serif; Set default font family */
+    font-family: "Pixelify Sans", sans-serif;
+    font-style: normal;
     color: #333; /* Set default text color to dark gray */
     line-height: 1.6; /* Set line height for better readability */
 }
@@ -135,6 +137,7 @@ input[type="number"] {
     position: relative;
     z-index: 1;
     box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
 }
 
 input[type="number"]:focus {
@@ -180,6 +183,7 @@ textarea:focus {
     padding: 12px 30px;
     border: 3px solid #654321;
     border-radius: 5px;
+    font-family: inherit;
     font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
