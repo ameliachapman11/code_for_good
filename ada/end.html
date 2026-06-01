@@ -14,11 +14,86 @@
 </head>
 <body>
     <div id="savings">
-        <p>You saved £<span id="price-savings"></span>!</p>
-        <p>You saved <span id="emissions-savings"></span>kg!</p>
+        <h1>🎉 Congratulations! Your Shopping is Complete!</h1>
+        <div class="savings-summary">
+            <h2>💰 Your Total Savings</h2>
+            <div class="savings-item">
+                <span class="savings-label">Money Saved:</span>
+                <span class="savings-value" id="price-savings">£0.00</span>
+            </div>
+            <div class="savings-item">
+                <span class="savings-label">Emissions Reduced:</span>
+                <span class="savings-value" id="emissions-savings">0.00 kg CO2</span>
+            </div>
+        </div>
+        <div class="item-changes">
+            <h3>🔄 Your Smart Choices</h3>
+            <ul id="item-changes-list"></ul>
+        </div>
+        <div class="final-list">
+            <h3>📝 Your Final Shopping List</h3>
+            <ul id="final-shopping-list"></ul>
+        </div>
+        <div class="impact-message">
+            <p>🌱 By making these smart choices, you've made a positive impact on both your wallet and the environment!</p>
+        </div>
     </div>
     
     <!-- Link to JavaScript file for form functionality -->
     <script src="extractFoodInfo.js"></script>
+    
+    <script>
+        // Load and display savings data from sessionStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const priceSavings = sessionStorage.getItem('totalSavings') || '0.00';
+            const emissionsSavings = sessionStorage.getItem('totalEmissions') || '0.00';
+            const finalShoppingList = JSON.parse(sessionStorage.getItem('finalShoppingList') || '[]');
+            const itemChanges = JSON.parse(sessionStorage.getItem('itemChanges') || '[]');
+            
+            // Update the savings display
+            document.getElementById('price-savings').textContent = '£' + priceSavings;
+            document.getElementById('emissions-savings').textContent = emissionsSavings + ' kg CO2';
+            
+            // Display the item changes
+            const itemChangesElement = document.getElementById('item-changes-list');
+            if (itemChanges.length > 0) {
+                itemChangesElement.innerHTML = itemChanges.map(change => {
+                    if (change.changed) {
+                        return `<li class="item-change">${change.original} → ${change.selected}</li>`;
+                    } else {
+                        return `<li class="item-kept">${change.original} ✓</li>`;
+                    }
+                }).join('');
+            } else {
+                itemChangesElement.innerHTML = '<li>No changes made</li>';
+            }
+            
+            // Display the final shopping list
+            const finalListElement = document.getElementById('final-shopping-list');
+            if (finalShoppingList.length > 0) {
+                finalListElement.innerHTML = finalShoppingList.map(item => `<li>${item}</li>`).join('');
+            } else {
+                finalListElement.innerHTML = '<li>No items in final list</li>';
+            }
+            
+            // Add some visual feedback based on savings
+            const priceElement = document.getElementById('price-savings');
+            const emissionsElement = document.getElementById('emissions-savings');
+            
+            if (parseFloat(priceSavings) > 0) {
+                priceElement.style.color = '#4CAF50';
+                priceElement.style.fontWeight = 'bold';
+            }
+            
+            if (parseFloat(emissionsSavings) > 0) {
+                emissionsElement.style.color = '#4CAF50';
+                emissionsElement.style.fontWeight = 'bold';
+            }
+            
+            console.log('Final shopping list:', finalShoppingList);
+            console.log('Total savings: £' + priceSavings);
+            console.log('Emissions reduced: ' + emissionsSavings + ' kg CO2');
+        });
+    </script>
 </body>
 </html>

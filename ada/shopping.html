@@ -38,27 +38,29 @@
         
         /* Alternative options container */
         .alternatives-container {
-            position: absolute;
-            left: 20px;
+            position: fixed;
             top: 50%;
+            left: 400px;
             transform: translateY(-50%);
             display: none;
-            flex-direction: column;
-            gap: 15px;
+            flex-direction: row;
+            gap: 20px;
             z-index: 10;
+            justify-content: center;
+            align-items: center;
         }
         
         /* Individual alternative option card */
         .alternative-card {
-            width: 200px;
-            height: 120px;
+            width: 280px;
+            height: 180px;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
         }
         
         .alternative-card:hover {
@@ -74,19 +76,19 @@
         
         .card-title {
             font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 18px;
+            margin-bottom: 12px;
             color: #333;
         }
         
         .card-price {
-            font-size: 12px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         
         .card-emissions {
-            font-size: 11px;
+            font-size: 14px;
             color: #888;
         }
         
@@ -108,7 +110,7 @@
         /* Shopping list paper - styled to look like a real piece of paper */
         .shopping-paper {
             width: 300px;
-            height: 450px;
+            height: 600px; /* Increased height from 450px to 600px */
             background: #FFF8DC; /* Cream color for paper */
             border-radius: 15px;
             box-shadow: 
@@ -117,8 +119,9 @@
             padding: 30px;
             transform: rotate(-2deg); /* Slight rotation for natural look */
             border: 3px solid #F5DEB3; /* Light brown border */
-            margin-left: 30px;
+            margin-left: 50px; /* Move the shopping list to the left */
             position: relative; /* Needed for loading overlay positioning */
+            overflow: hidden; /* Prevent content from going outside */
         }
         
         /* Loading overlay that appears while AI processes the shopping list */
@@ -188,7 +191,7 @@
             list-style: none;
             padding: 15px;
             margin: 0;
-            max-height: 280px; /* Limit height to make it scrollable */
+            max-height: 400px; /* Increased height to match longer paper */
             overflow-y: auto; /* Enable vertical scrolling */
             background: #FFF8DC; /* Same color as paper */
             border: 2px solid #8B4513; /* Dark brown border like a text field */
@@ -196,6 +199,7 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Inner shadow for field effect */
             font-family: 'Arial', sans-serif;
             line-height: 1.6;
+            box-sizing: border-box; /* Include padding and border in height calculation */
         }
         
         .shopping-list li {
@@ -302,6 +306,7 @@
             <div class="paper-header">
                 <h2 class="paper-title">Shopping List</h2>
                 <div class="budget-display" id="budgetDisplay">Budget: £0</div>
+                <div id="savingsDisplay"></div>
             </div>
             <!-- List container where cleaned shopping items will be displayed -->
             <ul class="shopping-list" id="shoppingList">
@@ -317,7 +322,68 @@
         // Global variables for managing the shopping list and alternatives
         let currentShoppingList = [];
         let currentItemIndex = 0;
+        let itemChanges = []; // Track original -> selected item changes
         // foodTable is declared in extractFoodInfo.js
+        
+        // Running total for savings tracking
+        const recorded_total_savings = [0, 0]; // [emissions, price]
+        
+        // Function to compare two foods and calculate savings
+        function compareTwoFoods(initialFood, chosenFood, foodTable) {
+            // Use the same getFoodData function that's used throughout the app
+            const initialData = getFoodData(initialFood);
+            const chosenData = getFoodData(chosenFood);
+            
+            if (!initialData || !chosenData) {
+                console.log('❌ Could not find data for comparison:', { initialFood, chosenFood });
+                return null;
+            }
+            
+            const emissionsSavings = initialData.emissions - chosenData.emissions;
+            const priceSavings = initialData.price - chosenData.price;
+            
+            console.log('💰 Savings calculation:', {
+                initial: { name: initialFood, price: initialData.price, emissions: initialData.emissions },
+                chosen: { name: chosenFood, price: chosenData.price, emissions: chosenData.emissions },
+                savings: { price: priceSavings, emissions: emissionsSavings }
+            });
+            
+            return {
+                emissionsSavings: emissionsSavings,
+                priceSavings: priceSavings,
+                initialEmissions: initialData.emissions,
+                chosenEmissions: chosenData.emissions,
+                initialPrice: initialData.price,
+                chosenPrice: chosenData.price
+            };
+        }
+        
+        // Function to add savings to total
+        function addToTotalSavings(initialFood, chosenFood, foodTable, recorded_total_savings) {
+            const result = compareTwoFoods(initialFood, chosenFood, foodTable);
+            if (result) {
+                recorded_total_savings[0] += Math.max(0, result.emissionsSavings);
+                recorded_total_savings[1] += Math.max(0, result.priceSavings);
+            }
+            return recorded_total_savings;
+        }
+        
+        // Function to display current savings
+        function displaySavings() {
+            const savingsElement = document.getElementById('savingsDisplay');
+            if (savingsElement) {
+                savingsElement.innerHTML = `
+                    <div style="background: #E8F5E8; padding: 15px; border-radius: 10px; margin: 10px 0; border-left: 4px solid #4CAF50;">
+                        <h3 style="margin: 0 0 10px 0; color: #2E7D32;">💰 Your Savings So Far</h3>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>Money Saved:</strong> £${recorded_total_savings[1].toFixed(2)}</p>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>Emissions Reduced:</strong> ${recorded_total_savings[0].toFixed(2)} kg CO2</p>
+                    </div>
+                `;
+            } else {
+                // Fallback: just log to console if element doesn't exist
+                console.log(`💰 Your Savings So Far: £${recorded_total_savings[1].toFixed(2)} and ${recorded_total_savings[0].toFixed(2)} kg CO2`);
+            }
+        }
         
         // Initialize food data when the page loads
         async function initializeFoodData() {
@@ -338,8 +404,157 @@
             }
         }
         
-        // Function to find similar food items using AI and the Excel data
+        // Function to call AI API for finding alternatives
+        async function callAIForAlternatives(itemName) {
+            const API_URL = 'http://localhost:3001/api/claude';
+            
+            const prompt = `For the food item "${itemName}", suggest exactly 2 similar alternative food items from the same category.
+
+CRITICAL: Return ONLY the 2 item names separated by a comma. No explanations, no prefixes, no additional text.
+
+Examples:
+- apples → bananas, oranges
+- milk → oat milk, almond milk  
+- beef → chicken, pork
+- bread → bagels, croissants
+
+Your response:`;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        shoppingList: prompt
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.success && data.items) {
+                    // Clean up the AI response - remove any explanatory text
+                    const cleanItems = data.items.map(item => {
+                        // Remove common AI response prefixes
+                        let cleanItem = item.replace(/^(here are|alternatives?|options?|suggestions?):?\s*/i, '');
+                        cleanItem = cleanItem.replace(/^(some|a few|two)\s+/i, '');
+                        cleanItem = cleanItem.replace(/^(you could try|consider|try)\s+/i, '');
+                        cleanItem = cleanItem.replace(/[.!?]+$/, ''); // Remove trailing punctuation
+                        return cleanItem.trim();
+                    }).filter(item => item.length > 0 && !item.match(/^(and|or|the|a|an)\s/i));
+                    
+                    // Validate that items look like food names (simple check)
+                    const validItems = cleanItems.filter(item => {
+                        // Basic validation - must be longer than 1 char and not common non-food words
+                        return item.length > 1 && 
+                               !item.match(/^(here|there|some|any|all|each|every|this|that|these|those|could|would|should|might|may|can|will|shall|is|are|was|were|be|been|being|have|has|had|having|do|does|did|doing|get|gets|got|getting|make|makes|made|making|go|goes|went|going|come|comes|came|coming|see|sees|saw|seeing|know|knows|knew|knowing|think|thinks|thought|thinking|want|wants|wanted|wanting|like|likes|liked|liking|need|needs|needed|needing|use|uses|used|using|find|finds|found|finding|give|gives|gave|giving|tell|tells|told|telling|work|works|worked|working|call|calls|called|calling|ask|asks|asked|asking|feel|feels|felt|feeling|leave|leaves|left|leaving|put|puts|putting|mean|means|meant|meaning|keep|keeps|kept|keeping|let|lets|letting|begin|begins|began|beginning|seem|seems|seemed|seeming|help|helps|helped|helping|show|shows|showed|showing|hear|hears|heard|hearing|play|plays|played|playing|run|runs|ran|running|move|moves|moved|moving|live|lives|lived|living|believe|believes|believed|believing|hold|holds|held|holding|bring|brings|brought|bringing|happen|happens|happened|happening|write|writes|wrote|writing|provide|provides|provided|providing|sit|sits|sat|sitting|stand|stands|stood|standing|lose|loses|lost|losing|pay|pays|paid|paying|meet|meets|met|meeting|include|includes|included|including|continue|continues|continued|continuing|set|sets|setting|learn|learns|learned|learning|change|changes|changed|changing|lead|leads|led|leading|understand|understands|understood|understanding|watch|watches|watched|watching|follow|follows|followed|following|stop|stops|stopped|stopping|create|creates|created|creating|speak|speaks|spoke|speaking|read|reads|reading|allow|allows|allowed|allowing|add|adds|added|adding|spend|spends|spent|spending|grow|grows|grew|growing|open|opens|opened|opening|walk|walks|walked|walking|win|wins|won|winning|offer|offers|offered|offering|remember|remembers|remembered|remembering|love|loves|loved|loving|consider|considers|considered|considering|appear|appears|appeared|appearing|buy|buys|bought|buying|wait|waits|waited|waiting|serve|serves|served|serving|die|dies|died|dying|send|sends|sent|sending|expect|expects|expected|expecting|build|builds|built|building|stay|stays|stayed|staying|fall|falls|fell|falling|cut|cuts|cutting|reach|reaches|reached|reaching|kill|kills|killed|killing|remain|remains|remained|remaining|suggest|suggests|suggested|suggesting|raise|raises|raised|raising|pass|passes|passed|passing|sell|sells|sold|selling|require|requires|required|requiring|report|reports|reported|reporting|decide|decides|decided|deciding|pull|pulls|pulled|pulling)$/i);
+                    });
+                    
+                    console.log('🤖 AI alternatives cleaned and validated:', validItems);
+                    return validItems.slice(0, 2); // Take only first 2
+                }
+                
+                // If response format is different, try to parse the text
+                if (data.text) {
+                    const alternatives = data.text.split(',').map(item => item.trim()).filter(item => item.length > 0);
+                    return alternatives.slice(0, 2); // Take only first 2
+                }
+                
+                return [];
+            } catch (error) {
+                console.error('❌ AI alternatives API failed:', error);
+                return [];
+            }
+        }
+        
+        // Function to generate meaningful fallback alternatives
+        function generateFallbackAlternatives(itemName) {
+            const item = itemName.toLowerCase();
+            
+            // Try to generate meaningful alternatives based on common patterns
+            if (item.includes('cheese')) {
+                return ['Different brand cheese', 'Alternative cheese type'];
+            } else if (item.includes('milk')) {
+                return ['Different brand milk', 'Alternative milk type'];
+            } else if (item.includes('bread')) {
+                return ['Different brand bread', 'Alternative bread type'];
+            } else if (item.includes('meat') || item.includes('chicken') || item.includes('beef') || item.includes('pork')) {
+                return ['Different brand ' + itemName, 'Alternative ' + itemName + ' type'];
+            } else if (item.includes('fruit') || item.includes('apple') || item.includes('banana') || item.includes('orange')) {
+                return ['Different brand ' + itemName, 'Alternative ' + itemName + ' variety'];
+            } else if (item.includes('vegetable') || item.includes('carrot') || item.includes('tomato') || item.includes('cucumber')) {
+                return ['Different brand ' + itemName, 'Alternative ' + itemName + ' variety'];
+            } else {
+                // Generic fallback
+                return ['Different brand ' + itemName, 'Alternative ' + itemName];
+            }
+        }
+        
+        // Function to find similar food items with hardcoded examples
         async function findSimilarItems(itemName) {
+            // First try hardcoded similar items with realistic data
+            const similarItemsDatabase = {
+                'eggs': ['chicken', 'cheese'],
+                'avocados': ['cucumber', 'tomatoes'],
+                'bacon': ['turkey', 'chicken'],
+                'bread': ['bagels', 'croissants'],
+                'milk': ['oat milk', 'almond milk'],
+                'beef': ['chicken', 'pork'],
+                'apples': ['bananas', 'oranges'],
+                'rice': ['quinoa', 'pasta'],
+                'chicken': ['turkey', 'pork'],
+                'cheese': ['yogurt', 'milk'],
+                'bananas': ['apples', 'oranges'],
+                'pasta': ['rice', 'quinoa'],
+                'tomatoes': ['cucumber', 'peppers'],
+                'carrots': ['broccoli', 'spinach'],
+                'courgettes': ['cucumber', 'peppers'],
+                'raspberries': ['strawberries', 'blueberries'],
+                'pineapple': ['mango', 'papaya'],
+                'parmesan cheese': ['cheddar cheese', 'mozzarella'],
+                'cheddar cheese': ['parmesan cheese', 'gouda'],
+                'turkey': ['chicken', 'pork'],
+                'bagels': ['bread', 'croissants'],
+                'croissants': ['bread', 'bagels'],
+                'oat milk': ['milk', 'almond milk'],
+                'almond milk': ['milk', 'oat milk'],
+                'pork': ['chicken', 'turkey'],
+                'oranges': ['apples', 'bananas'],
+                'quinoa': ['rice', 'pasta'],
+                'yogurt': ['cheese', 'milk'],
+                'peppers': ['cucumber', 'tomatoes'],
+                'broccoli': ['carrots', 'spinach'],
+                'spinach': ['broccoli', 'carrots']
+            };
+            
+            // Check if we have hardcoded alternatives
+            const hardcodedAlternatives = similarItemsDatabase[itemName.toLowerCase()];
+            if (hardcodedAlternatives) {
+                console.log('📋 Using hardcoded alternatives for:', itemName);
+                return hardcodedAlternatives;
+            }
+            
+            // If no hardcoded alternatives, try AI API
+            try {
+                console.log('🤖 Using AI to find alternatives for:', itemName);
+                const aiAlternatives = await callAIForAlternatives(itemName);
+                if (aiAlternatives && aiAlternatives.length > 0) {
+                    return aiAlternatives;
+                }
+            } catch (error) {
+                console.error('❌ AI alternatives failed:', error);
+            }
+            
+            // Final fallback - create meaningful names based on the original item
+            const fallbackAlternatives = generateFallbackAlternatives(itemName);
+            console.log('🔄 Using fallback alternatives for:', itemName, '→', fallbackAlternatives);
+            return fallbackAlternatives;
+            
+            /* COMMENTED OUT - ORIGINAL AI INTEGRATION (TO FIX LATER)
             // First try to use the Excel data to find similar items
             if (typeof findSimilarFoodItems !== 'undefined') {
                 const similarItems = findSimilarFoodItems(itemName, foodTable);
@@ -393,6 +608,7 @@ Example: If input is "apples", return: "Bananas, Oranges"`;
                 // Fallback to simple alternatives
                 return getFallbackAlternatives(itemName);
             }
+            */
         }
         
         // Simple fallback function for finding alternatives
@@ -411,19 +627,71 @@ Example: If input is "apples", return: "Bananas, Oranges"`;
             }
         }
         
-        // Function to get food data (price and emissions) using the original function
+        // Hardcoded food data with realistic prices and emissions
+        const hardcodedFoodData = {
+            'eggs': { price: 2.00, emissions: 0.4 },
+            'chicken': { price: 4.50, emissions: 2.1 },
+            'cheese': { price: 3.40, emissions: 1.2 },
+            'avocados': { price: 0.94, emissions: 0.92 },
+            'cucumber': { price: 1.20, emissions: 0.3 },
+            'tomatoes': { price: 2.80, emissions: 0.4 },
+            'bacon': { price: 9.40, emissions: 19.31 },
+            'turkey': { price: 5.80, emissions: 2.5 },
+            'bread': { price: 1.20, emissions: 0.8 },
+            'bagels': { price: 2.10, emissions: 0.9 },
+            'croissants': { price: 2.80, emissions: 1.2 },
+            'milk': { price: 1.10, emissions: 0.6 },
+            'oat milk': { price: 2.50, emissions: 0.4 },
+            'almond milk': { price: 2.80, emissions: 0.5 },
+            'beef': { price: 6.80, emissions: 4.2 },
+            'pork': { price: 5.20, emissions: 3.5 },
+            'apples': { price: 2.50, emissions: 0.4 },
+            'bananas': { price: 1.80, emissions: 0.3 },
+            'oranges': { price: 2.20, emissions: 0.5 },
+            'rice': { price: 2.80, emissions: 0.9 },
+            'quinoa': { price: 4.20, emissions: 1.1 },
+            'pasta': { price: 1.50, emissions: 0.7 },
+            'yogurt': { price: 2.20, emissions: 0.8 },
+            'peppers': { price: 3.50, emissions: 0.6 },
+            'carrots': { price: 0.83, emissions: 0.94 },
+            'broccoli': { price: 2.20, emissions: 0.3 },
+            'spinach': { price: 2.80, emissions: 0.4 },
+            'courgettes': { price: 3.07, emissions: 0.85 },
+            'raspberries': { price: 14.29, emissions: 8.37 },
+            'pineapple': { price: 1.27, emissions: 0.93 },
+            'parmesan cheese': { price: 21.75, emissions: 24.02 },
+            'cheddar cheese': { price: 9.11, emissions: 20.75 }
+        };
+        
+        // Function to get food data (price and emissions) with hardcoded data
         function getFoodData(foodName) {
-            // Use the original findPriceAndEmissions function from extractFoodInfo.js
-            const result = findPriceAndEmissions(foodName, foodTable);
-            if (result) {
+            // First try hardcoded data
+            const hardcodedData = hardcodedFoodData[foodName.toLowerCase()];
+            if (hardcodedData) {
+                console.log('📋 Using hardcoded data for:', foodName);
                 return {
                     name: foodName,
-                    price: result.price,
-                    emissions: result.emissions
+                    price: hardcodedData.price,
+                    emissions: hardcodedData.emissions
                 };
-            } else {
-                return { name: foodName, price: 0, emissions: 0 };
             }
+            
+            // Fallback to Excel data if available
+            if (typeof findPriceAndEmissions !== 'undefined') {
+                const result = findPriceAndEmissions(foodName, foodTable);
+                if (result) {
+                    console.log('📊 Using Excel data for:', foodName);
+                    return {
+                        name: foodName,
+                        price: result.price,
+                        emissions: result.emissions
+                    };
+                }
+            }
+            
+            // Default fallback
+            console.log('⚠️ Using default data for:', foodName);
+            return { name: foodName, price: 2.50, emissions: 0.8 };
         }
         
         // Function to create alternative option cards
@@ -464,20 +732,49 @@ Example: If input is "apples", return: "Bananas, Oranges"`;
         
         // Function to handle alternative selection
         function selectAlternative(selectedItem, isOriginal) {
+            const originalItem = currentShoppingList[currentItemIndex];
+            
+            // Always track the change (even if it's the same item)
+            itemChanges.push({
+                original: originalItem,
+                selected: selectedItem,
+                changed: !isOriginal
+            });
+            
+            // Always calculate savings (even if item is kept the same, we show 0 savings)
+            addToTotalSavings(originalItem, selectedItem, foodTable, recorded_total_savings);
+            
             if (!isOriginal) {
                 // Replace the current item in the list
                 currentShoppingList[currentItemIndex] = selectedItem;
                 updateShoppingListDisplay();
             }
             
+            // Always display updated savings
+            displaySavings();
+            
             // Move to next item
             currentItemIndex++;
-            if (currentItemIndex < currentShoppingList.length) {
-                processNextItem();
-            } else {
-                // All items processed
+            
+            // Check if we've processed all items
+            if (currentItemIndex >= currentShoppingList.length) {
+                // All items processed - redirect to end.html
                 document.getElementById('alternativesContainer').style.display = 'none';
-                alert('All items processed! Your final shopping list is ready.');
+                displaySavings(); // Show final savings
+                
+                // Store final savings in sessionStorage to pass to end.html
+                sessionStorage.setItem('totalSavings', recorded_total_savings[1].toFixed(2));
+                sessionStorage.setItem('totalEmissions', recorded_total_savings[0].toFixed(2));
+                sessionStorage.setItem('finalShoppingList', JSON.stringify(currentShoppingList));
+                sessionStorage.setItem('itemChanges', JSON.stringify(itemChanges));
+                
+                // Redirect to end.html after a short delay
+                setTimeout(() => {
+                    window.location.href = 'end.html';
+                }, 2000);
+            } else {
+                // Process next item
+                processNextItem();
             }
         }
         
@@ -613,7 +910,10 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                 console.error('❌ Error details:', error.message);
                 console.error('❌ Error stack:', error.stack);
                 console.log('🔄 Falling back to basic processing...');
-                throw error;
+                
+                // FALLBACK - Basic string processing when API fails
+                const items = shoppingList.split(/[,;]/).map(item => item.trim()).filter(item => item.length > 0);
+                return items;
             }
         }
         
@@ -651,10 +951,12 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
                     // Show message if no valid grocery items were found
                     shoppingListElement.innerHTML = '<li>No valid grocery items found in your list</li>';
                 } else {
-                    // Update the display and start processing alternatives
-                    updateShoppingListDisplay();
-                    // Start processing the first item
-                    await processNextItem();
+                // Update the display and start processing alternatives
+                updateShoppingListDisplay();
+                // Initialize savings display
+                displaySavings();
+                // Start processing the first item
+                await processNextItem();
                 }
                 
                 console.log('✅ Claude AI filtering completed successfully');

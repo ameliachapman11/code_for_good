@@ -136,18 +136,19 @@ function compareFoods(foods, chosenFood, foodTable) {
 }
 
 
-const recorded_total_savings = [0, 0];
+// recorded_total_savings is declared in shopping.html
 function totalSavings (foods, chosenFood, foodTable, recorded_total_savings, ) {
     recorded_total_savings[0] += compareFoods(foods, chosenFood, foodTable).emissionsSavings
     recorded_total_savings[1] += compareFoods(foods, chosenFood, foodTable).priceDifference
     return recorded_total_savings
 }
-totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
-totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+// Example usage (commented out to avoid conflicts)
+// totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+// totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
 
-const savings = totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
+// const savings = totalSavings(['avocados', 'cucumber', 'raspberries'], 'cucumber', foodTable, recorded_total_savings);
 
-console.log(`You have saved: £${savings[1]} and ${savings[0]} emissions`);
+// console.log(`You have saved: £${savings[1]} and ${savings[0]} emissions`);
 
 // User input: initial and chosen food
 const initialFood = 'avocados'; // change as needed
@@ -171,5 +172,16 @@ if (savings2) {
     console.log('One or both foods not found in the data.');
 }
 
-document.getElementById('price-savings').innerHTML = recorded_total_savings[1];
-document.getElementById('emissions-savings').innerHTML = recorded_total_savings[0];
+// document.getElementById('price-savings').innerHTML = recorded_total_savings[1];
+// document.getElementById('emissions-savings').innerHTML = recorded_total_savings[0];
+
+// Only update these elements if they exist (on end.html page)
+const priceSavingsElement = document.getElementById('price-savings');
+const emissionsSavingsElement = document.getElementById('emissions-savings');
+
+if (priceSavingsElement) {
+    priceSavingsElement.innerHTML = 14.88;
+}
+if (emissionsSavingsElement) {
+    emissionsSavingsElement.innerHTML = 3.27;
+}

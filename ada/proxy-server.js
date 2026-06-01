@@ -17,7 +17,7 @@ app.post('/api/claude', async (req, res) => {
         const { shoppingList } = req.body;
         
         // Your Anthropic API key - set as environment variable
-        const API_KEY = process.env.ANTHROPIC_API_KEY || 'your-api-key-here';
+        const API_KEY = process.env.ANTHROPIC_API_KEY || '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';
         
         const prompt = `You are an intelligent shopping list parser for a UK grocery store. Your job is to understand what the user actually wants to buy, even if they write it poorly.
 
@@ -95,11 +95,19 @@ Return ONLY the cleaned grocery items as a comma-separated string. No explanatio
 
         const cleanedText = data.content[0].text.trim();
         
-        // Split the AI response into individual items - handle periods too
-        const result = cleanedText.split(/[,;]/).map(item => {
-            // Also split on periods if they're clearly separators
-            return item.split('.').map(subItem => subItem.trim()).filter(subItem => subItem.length > 0);
-        }).flat().filter(item => item.length > 0);
+        // Clean up the response - remove common AI prefixes
+        let cleanText = cleanedText.replace(/^(here are|alternatives?|options?|suggestions?):?\s*/i, '');
+        cleanText = cleanText.replace(/^(some|a few|two)\s+/i, '');
+        cleanText = cleanText.replace(/^(you could try|consider|try)\s+/i, '');
+        
+        // Split by comma first, then clean each item
+        const result = cleanText.split(',').map(item => {
+            let cleanItem = item.trim();
+            // Remove any remaining explanatory text
+            cleanItem = cleanItem.replace(/^(and|or|the|a|an)\s+/i, '');
+            cleanItem = cleanItem.replace(/[.!?]+$/, ''); // Remove trailing punctuation
+            return cleanItem.trim();
+        }).filter(item => item.length > 0 && !item.match(/^(and|or|the|a|an)\s/i));
 
         res.json({ success: true, items: result });
         
